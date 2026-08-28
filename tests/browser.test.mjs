@@ -332,6 +332,20 @@ check('con la ruleta vacía avisa bajo la rueda',
 await load();
 await evalJs("document.getElementById('demoBtn').click(); return 1;");
 const themed0 = await evalJs(HASH);
+const mmo = await evalJs(`const t = document.getElementById('theme');
+  t.value = 'pokemmo'; t.dispatchEvent(new Event('change'));
+  const cs = getComputedStyle(document.body);
+  return { theme: document.body.dataset.theme,
+    accent: cs.getPropertyValue('--accent').trim(),
+    bg: cs.getPropertyValue('--bg').trim(),
+    pickers: document.getElementById('customColors').offsetParent !== null };`);
+check('el tema PokeMMO aplica su paleta',
+  mmo.theme === 'pokemmo' && mmo.accent === '#2FBFC9' && mmo.bg === '#0B101C', JSON.stringify(mmo));
+check('PokeMMO no muestra los selectores de color', mmo.pickers === false);
+const mmoWheel = await evalJs(HASH);
+await evalJs(`const t = document.getElementById('theme'); t.value = 'pokemon'; t.dispatchEvent(new Event('change')); return 1;`);
+check('cada tema pinta la ruleta distinto', await evalJs(HASH) !== mmoWheel);
+
 check('los selectores de color están ocultos con un tema de fábrica',
   await evalJs("return document.getElementById('customColors').offsetParent === null;"));
 const applied = await evalJs(`const t = document.getElementById('theme');

@@ -7,6 +7,10 @@
   --sans:'Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;
 }
 body[data-theme="pokemon"]{ --accent:#ee1515; --accent2:#3b4cca; --gold:#ffcb05; --bg:#0f1118; --bg2:#181b26; }
+/* Guiño al cliente de PokeMMO: navy muy oscuro, paneles pizarra, acento cian. */
+body[data-theme="pokemmo"]{ --accent:#2FBFC9; --accent2:#3D6CE0; --gold:#F0B429;
+  --bg:#0B101C; --bg2:#151D31; --fg:#E8EEFC; --muted:#8B98B8; --line:rgba(160,190,255,.14);
+  --card:rgba(120,160,255,.06); }
 body[data-theme="neon"]   { --accent:#ff2fd0; --accent2:#00e5ff; --gold:#c6ff00; --bg:#0a0713; --bg2:#150e24; }
 body[data-theme="pastel"] { --accent:#ff8fab; --accent2:#8ecae6; --gold:#ffd166; --bg:#fdf7f9; --bg2:#ffffff;
   --fg:#2b2b33; --muted:#6c6f80; --line:rgba(0,0,0,.12); --card:rgba(0,0,0,.035); }

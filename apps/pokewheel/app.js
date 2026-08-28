@@ -5,10 +5,11 @@ const $ = (id) => document.getElementById(id);
 const TAU = Math.PI * 2;
 const STORE = 'pokewheel.v1';
 const BUILD = '2026-08-28.3'; // se ve en consola y en el panel: sirve para saber qué versión corre
-const THEMES = ['pokemon', 'neon', 'pastel', 'mono', 'custom'];
+const THEMES = ['pokemon', 'pokemmo', 'neon', 'pastel', 'mono', 'custom'];
 
 const PALETTES = {
   pokemon: ['#EE1515', '#F0F0F0', '#3B4CCA', '#FFCB05', '#2A75BB', '#7AC74C', '#B7B7CE', '#F58020'],
+  pokemmo: ['#2FBFC9', '#3D6CE0', '#F0B429', '#4CAF6D', '#8E6BD9', '#D9534F', '#A8D8E8', '#48557A'],
   neon:    ['#FF2FD0', '#00E5FF', '#C6FF00', '#7C4DFF', '#FF4081', '#18FFFF', '#FFD600', '#651FFF'],
   pastel:  ['#FFADAD', '#FFD6A5', '#FDFFB6', '#CAFFBF', '#9BF6FF', '#A0C4FF', '#BDB2FF', '#FFC6FF'],
   mono:    ['#111111', '#EDEDED', '#3A3A3A', '#C9C9C9', '#5C5C5C', '#A6A6A6', '#242424', '#DCDCDC'],

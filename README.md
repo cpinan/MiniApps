@@ -19,7 +19,7 @@ publicar en GitHub Pages y compartir con un link.
   - *Intentos*: cuántas rondas de giro tiene el sorteo.
   - *Quitar al seleccionado después de cada intento* (on/off).
   - *El ganador es*: el último seleccionado, o la lista completa de seleccionados.
-  - Duración del giro, sonido, y tema visual: 4 presets (Pokémon / Neón / Pastel / Mono) o
+  - Duración del giro, sonido, y tema visual: 5 presets (Pokémon / PokeMMO / Neón / Pastel / Mono) o
     **Personalizado**, con tres colores a elección — los 8 gajos se derivan de ellos en HSL,
     alternando claro/oscuro para que dos vecinos nunca se confundan.
 - **Justo**: el ganador sale de `crypto.getRandomValues` con rechazo de rango (sin sesgo modular),
@@ -35,6 +35,8 @@ publicar en GitHub Pages y compartir con un link.
   Todo se queda quieto con `prefers-reduced-motion`.
 - La pokébola es solo clickeable (no arrastrable) con estados idle / hover / pressed / disabled.
 - El service worker se actualiza solo: una corrección llega al recargar, sin borrar datos del sitio.
+- Botón **Reparar app**: desregistra service workers, borra cachés y recarga saltándose la caché
+  HTTP. La salida cuando un service worker viejo dejó pegada una versión con bugs.
 - Atajos: `Espacio` gira, `Esc` cierra el modal. La rueda entera es clickable.
 
 ## Correr en local
@@ -81,5 +83,6 @@ Sin dependencias: `node` y (para la suite de navegador) Chrome instalado.
 
 ## Licencia
 
-MIT. Pokémon es marca de Nintendo / Creatures / GAME FREAK; este proyecto es fan-art
-no oficial y solo usa colores y estilo, sin assets de la franquicia.
+MIT. Pokémon es marca de Nintendo / Creatures / GAME FREAK, y PokeMMO es un proyecto
+independiente ajeno a este; los temas son solo paletas de colores como guiño, sin assets ni
+afiliación con ninguno de los dos.
