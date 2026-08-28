@@ -3,9 +3,10 @@
   "private": true,
   "description": "Minijuegos y miniapps PWA estáticas, sin build ni dependencias.",
   "scripts": {
-    "test": "node tests/pokewheel.test.mjs && node tests/browser.test.mjs",
+    "test": "npm run test:unit && npm run test:browser && npm run test:teams",
     "test:unit": "node tests/pokewheel.test.mjs",
     "test:browser": "node tests/browser.test.mjs",
+    "test:teams": "node tests/teams.test.mjs",
     "serve": "python3 -m http.server 8080"
   },
   "license": "MIT"

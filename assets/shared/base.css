@@ -1,0 +1,130 @@
+/* ===================================================================
+   Base compartida de MiniApps: temas, panel, botones, modal, responsive.
+   Cada app añade encima su propio CSS. Ver apps/pokewheel para el original.
+   =================================================================== */
+:root{
+  --bg:#0f1118; --bg2:#181b26; --fg:#f5f6fa; --muted:#a4a9bd;
+  --accent:#ee1515; --accent2:#3b4cca; --gold:#ffcb05;
+  --line:rgba(255,255,255,.12); --card:rgba(255,255,255,.045);
+  --radius:16px; --pixel:'Press Start 2P',ui-monospace,monospace;
+  --sans:'Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+body[data-theme="pokemon"]{ --accent:#ee1515; --accent2:#3b4cca; --gold:#ffcb05; --bg:#0f1118; --bg2:#181b26; }
+body[data-theme="pokemmo"]{ --accent:#2FBFC9; --accent2:#3D6CE0; --gold:#F0B429;
+  --bg:#0B101C; --bg2:#151D31; --fg:#E8EEFC; --muted:#8B98B8; --line:rgba(160,190,255,.14); --card:rgba(120,160,255,.06); }
+body[data-theme="neon"]   { --accent:#ff2fd0; --accent2:#00e5ff; --gold:#c6ff00; --bg:#0a0713; --bg2:#150e24; }
+body[data-theme="pastel"] { --accent:#ff8fab; --accent2:#8ecae6; --gold:#ffd166; --bg:#fdf7f9; --bg2:#ffffff;
+  --fg:#2b2b33; --muted:#6c6f80; --line:rgba(0,0,0,.12); --card:rgba(0,0,0,.035); }
+body[data-theme="mono"]   { --accent:#e5e5e5; --accent2:#8a8a8a; --gold:#ffffff; --bg:#000; --bg2:#111; }
+body[data-theme="custom"] { --bg:#0f1118; --bg2:#181b26; }
+
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+html{-webkit-text-size-adjust:100%}
+body{-webkit-tap-highlight-color:transparent;color:var(--fg);font-family:var(--sans);-webkit-font-smoothing:antialiased;
+  background:radial-gradient(1200px 700px at 15% -10%, color-mix(in srgb,var(--accent) 22%, transparent), transparent 60%),
+             radial-gradient(900px 600px at 110% 10%, color-mix(in srgb,var(--accent2) 20%, transparent), transparent 60%),
+             var(--bg)}
+
+/* ---------- topbar ---------- */
+.topbar{display:flex;align-items:center;gap:12px;padding:calc(14px + env(safe-area-inset-top)) 18px 14px;
+  border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--bg2) 80%, transparent);
+  backdrop-filter:blur(8px);position:sticky;top:0;z-index:5}
+.logo{font-family:var(--pixel);font-size:13px;margin:0;display:flex;align-items:center;gap:10px;letter-spacing:.5px}
+.logo-ball{width:18px;height:18px;border-radius:50%;flex:0 0 auto;
+  background:linear-gradient(var(--accent) 0 47%, #111 47% 53%, #fff 53% 100%);border:2px solid #111;
+  box-shadow:0 0 0 1px rgba(255,255,255,.25)}
+.back{color:var(--fg);text-decoration:none;font-size:20px;line-height:1;opacity:.7;padding:4px 8px;border-radius:8px}
+.back:hover{opacity:1;background:var(--card)}
+.topbar .ghost{margin-left:auto}
+
+/* ---------- layout ---------- */
+.layout{display:grid;grid-template-columns:minmax(300px,380px) 1fr;gap:24px;
+  padding:24px calc(24px + env(safe-area-inset-right)) calc(32px + env(safe-area-inset-bottom)) calc(24px + env(safe-area-inset-left));
+  max-width:1180px;margin:0 auto;align-items:start}
+.panel{display:flex;flex-direction:column;gap:12px}
+.stage{display:flex;flex-direction:column;gap:14px;min-width:0}
+
+/* ---------- bloques ---------- */
+.block{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.block summary{font-family:var(--pixel);font-size:10px;letter-spacing:.5px;cursor:pointer;padding:4px 0;display:flex;align-items:center;gap:8px}
+.block summary::-webkit-details-marker{display:none}
+.block summary::before{content:'▸';color:var(--accent);font-family:var(--sans);font-size:14px}
+.block[open] summary::before{content:'▾'}
+.badge{margin-left:auto;background:var(--accent);color:#fff;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:900}
+
+textarea{width:100%;margin-top:10px;background:var(--bg2);color:var(--fg);border:1px solid var(--line);
+  border-radius:12px;padding:10px 12px;font-family:var(--sans);font-size:14px;resize:vertical;line-height:1.45}
+textarea:focus,input:focus,select:focus{outline:2px solid var(--accent2);outline-offset:1px}
+
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.row.center{justify-content:center}
+button{font-family:var(--sans);font-weight:800;font-size:13px;border-radius:12px;padding:9px 14px;cursor:pointer;
+  border:1px solid var(--line);transition:transform .08s ease, filter .15s ease}
+button:active{transform:translateY(1px)}
+.primary{background:var(--accent);color:#fff;border-color:transparent;box-shadow:0 4px 0 color-mix(in srgb,var(--accent) 55%, #000)}
+.primary:hover{filter:brightness(1.08)}
+.ghost{background:transparent;color:var(--fg)}
+.ghost:hover{background:var(--card)}
+.danger{color:#ff6b6b}
+button.tiny{font-size:11px;padding:6px 10px;min-height:0;opacity:.7}
+button.tiny:hover{opacity:1}
+button:disabled{opacity:.5;cursor:not-allowed}
+
+.field{display:flex;flex-direction:column;gap:6px;margin-top:10px;font-size:13px;color:var(--muted)}
+.field input,.field select{background:var(--bg2);color:var(--fg);border:1px solid var(--line);border-radius:10px;
+  padding:8px 10px;font-size:14px;font-family:var(--sans)}
+.field input[type=range]{padding:0;accent-color:var(--accent)}
+.check{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;color:var(--fg);cursor:pointer}
+.check input{accent-color:var(--accent);width:16px;height:16px}
+.hint{font-size:12px;color:var(--muted);margin:2px 4px 0;min-height:1.2em}
+.hint.build{font-size:10px;opacity:.45;font-family:var(--pixel);letter-spacing:.5px;margin:0}
+.footer-row{display:flex;align-items:center;gap:10px;justify-content:space-between;margin-top:4px;padding:0 4px}
+
+/* ---------- selector de tema ---------- */
+.colors{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-top:12px}
+.colors[hidden]{display:none}  /* si no, display:flex gana al [hidden] del navegador */
+.swatch{display:flex;flex-direction:column;gap:5px;align-items:center;font-size:11px;color:var(--muted);cursor:pointer}
+.swatch input[type=color]{width:46px;height:34px;padding:0;border:1px solid var(--line);border-radius:10px;background:none;cursor:pointer}
+.colors button{margin-left:auto;align-self:center}
+
+/* ---------- confeti ---------- */
+.fx{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:40}
+
+/* ---------- modal ---------- */
+.modal{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:rgba(0,0,0,.65);
+  backdrop-filter:blur(4px);padding:20px}
+.modal[hidden]{display:none}
+.modal-card{position:relative;overflow:hidden;background:var(--bg2);border:1px solid var(--line);border-radius:22px;
+  padding:26px 24px;max-width:460px;width:100%;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.6);
+  animation:pop .28s cubic-bezier(.2,1.4,.4,1)}
+@keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-kicker{font-family:var(--pixel);font-size:9px;color:var(--accent);margin:0 0 12px;letter-spacing:1px}
+.modal-title{font-family:var(--pixel);font-size:clamp(14px,4.5vw,22px);line-height:1.5;margin:0 0 4px;word-break:break-word}
+.rays{position:absolute;inset:-60%;pointer-events:none;opacity:.14;
+  background:conic-gradient(from 0deg, transparent 0 7deg, var(--gold) 7deg 10deg, transparent 10deg 20deg);
+  animation:rays 16s linear infinite}
+.modal-card.final .rays{opacity:.3}
+@keyframes rays{to{transform:rotate(360deg)}}
+.modal-card>*:not(.rays){position:relative;z-index:1}
+
+/* ===================== responsive (al final: gana sobre las reglas base) ===================== */
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr;padding:14px;gap:14px}
+  .stage{order:-1}
+  .topbar{padding:calc(10px + env(safe-area-inset-top)) 14px 10px}
+  .logo{font-size:11px}
+  .block summary{font-size:9px;padding:6px 0}
+}
+@media(max-width:560px){
+  .layout{padding:10px}
+  button{min-height:44px;padding:10px 14px}
+  .row>button{flex:1 1 auto}
+  textarea,.field input,.field select{font-size:16px}
+  .modal-card{padding:22px 16px;border-radius:18px}
+  .swatch input[type=color]{width:100%;min-width:56px;height:40px}
+}
+@media(prefers-reduced-motion:reduce){
+  .modal-card,.rays{animation:none}
+  button{transition:none}
+}
