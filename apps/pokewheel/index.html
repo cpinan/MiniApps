@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>PokéRuleta — sorteo de nombres</title>
+<meta name="description" content="Ruleta de nombres estilo Pokémon: pega tu lista, configura rondas y sortea ganadores.">
+<meta name="theme-color" content="#ee1515">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;700;900&display=swap">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body data-theme="pokemon">
+
+<header class="topbar">
+  <a class="back" href="../../index.html" title="Volver a MiniApps">&#8592;</a>
+  <h1 class="logo"><span class="logo-ball" aria-hidden="true"></span> PokéRuleta</h1>
+  <button id="themeBtn" class="ghost" type="button" title="Cambiar tema">Tema</button>
+</header>
+
+<main class="layout">
+
+  <!-- ============ PANEL IZQUIERDO ============ -->
+  <section class="panel" aria-label="Configuración">
+
+    <details class="block" open>
+      <summary>1 · Participantes <span id="countBadge" class="badge">0</span></summary>
+      <textarea id="namesInput" rows="7" spellcheck="false"
+        placeholder="Pega aquí los nombres.&#10;Separa por coma, punto y coma, tab, salto de línea o CSV.&#10;&#10;Ash, Misty, Brock&#10;Gary&#10;Serena;Clemont"></textarea>
+      <div class="row">
+        <button id="loadBtn" class="primary" type="button">Cargar lista</button>
+        <button id="demoBtn" class="ghost" type="button">Demo</button>
+        <button id="clearBtn" class="ghost danger" type="button">Vaciar</button>
+      </div>
+      <label class="check"><input type="checkbox" id="dedupe" checked> Quitar nombres repetidos</label>
+      <label class="check"><input type="checkbox" id="shuffle"> Mezclar el orden al cargar</label>
+    </details>
+
+    <details class="block" open>
+      <summary>2 · Reglas</summary>
+      <label class="field">
+        <span>Intentos (rondas de giro)</span>
+        <input type="number" id="rounds" min="1" max="99" value="1">
+      </label>
+      <label class="check"><input type="checkbox" id="removePicked" checked>
+        Quitar al seleccionado después de cada intento</label>
+      <label class="field">
+        <span>El ganador es…</span>
+        <select id="winnerMode">
+          <option value="last">el último seleccionado</option>
+          <option value="all">todos los seleccionados</option>
+        </select>
+      </label>
+      <label class="field">
+        <span>Duración del giro: <b id="durLabel">5 s</b></span>
+        <input type="range" id="duration" min="2" max="15" step="1" value="5">
+      </label>
+      <label class="check"><input type="checkbox" id="sound" checked> Sonido</label>
+    </details>
+
+    <details class="block">
+      <summary>3 · Historial <span id="histBadge" class="badge">0</span></summary>
+      <ol id="history" class="history"><li class="empty">Sin giros todavía.</li></ol>
+      <div class="row">
+        <button id="resetBtn" class="ghost" type="button">Reiniciar sorteo</button>
+        <button id="copyBtn" class="ghost" type="button">Copiar resultados</button>
+      </div>
+    </details>
+
+    <p class="hint" id="statusLine">Carga una lista para empezar.</p>
+  </section>
+
+  <!-- ============ RULETA ============ -->
+  <section class="stage" aria-label="Ruleta">
+    <div class="wheel-wrap">
+      <div class="pointer" aria-hidden="true"></div>
+      <canvas id="wheel" width="520" height="520" role="img" aria-label="Ruleta de nombres"></canvas>
+      <button id="spinBtn" class="spin" type="button" aria-label="Girar la ruleta">
+        <span class="ball"><span class="ball-btn"></span></span>
+      </button>
+      <canvas id="fx" class="fx" aria-hidden="true"></canvas>
+    </div>
+    <p class="round" id="roundLine">Ronda 0 / 1</p>
+  </section>
+</main>
+
+<!-- ============ MODAL GANADOR ============ -->
+<div id="modal" class="modal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <p class="modal-kicker" id="modalKicker">Ronda 1</p>
+    <h2 class="modal-title" id="modalTitle">—</h2>
+    <ol class="modal-list" id="modalList" hidden></ol>
+    <div class="row center">
+      <button id="againBtn" class="primary" type="button">Siguiente giro</button>
+      <button id="closeBtn" class="ghost" type="button">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script src="./app.js"></script>
+</body>
+</html>
