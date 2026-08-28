@@ -19,12 +19,17 @@ publicar en GitHub Pages y compartir con un link.
   - *Intentos*: cuántas rondas de giro tiene el sorteo.
   - *Quitar al seleccionado después de cada intento* (on/off).
   - *El ganador es*: el último seleccionado, o la lista completa de seleccionados.
-  - Duración del giro, sonido, y tema visual (Pokémon / Neón / Pastel / Mono).
+  - Duración del giro, sonido, y tema visual: 4 presets (Pokémon / Neón / Pastel / Mono) o
+    **Personalizado**, con tres colores a elección — los 8 gajos se derivan de ellos en HSL,
+    alternando claro/oscuro para que dos vecinos nunca se confundan.
 - **Justo**: el ganador sale de `crypto.getRandomValues` con rechazo de rango (sin sesgo modular),
   no de `Math.random()`.
 - **Persistencia**: lista, configuración e historial se guardan en `localStorage`.
 - **Offline**: service worker con cache del app shell.
-- Atajos: `Espacio` gira, `Esc` cierra el modal.
+- **Móvil**: la ruleta va primero, se ajusta al alto de pantalla (también apaisado), objetivos
+  táctiles de 44px, inputs de 16px (iOS no hace zoom) y respeta el safe-area del notch.
+- Un clic siempre gira: si la tanda terminó o la ruleta se vació, arranca una nueva.
+- Atajos: `Espacio` gira, `Esc` cierra el modal. La rueda entera es clickable.
 
 ## Correr en local
 
@@ -38,12 +43,20 @@ python3 -m http.server 8080
 ## Verificar
 
 ```bash
-node tests/pokewheel.test.mjs
+npm test          # las dos suites
+npm run test:unit # solo lógica pura
+npm run test:browser
 ```
 
-Extrae las funciones puras de `app.js` (parseo, aleatoriedad, matemática del giro) y las prueba
-sin navegador: 15 casos, incluidos 1600 giros comprobando que la flecha cae siempre en el
-segmento elegido.
+Sin dependencias: `node` y (para la suite de navegador) Chrome instalado.
+
+- **`tests/pokewheel.test.mjs`** — extrae las funciones puras de `app.js` (parseo, aleatoriedad,
+  matemática del giro): 15 casos, incluidos 1600 giros comprobando que la flecha cae siempre en
+  el segmento elegido.
+- **`tests/browser.test.mjs`** — Chrome headless por CDP, 28 casos: que la rueda **gira** de
+  verdad (hash de píxeles del canvas cambiando a mitad del giro), el modal del ganador, volver a
+  girar tras cerrar una tanda, los colores personalizados, y que nada se desborda en 390×844 ni
+  en apaisado. Se salta solo si no encuentra Chrome.
 
 ## Publicar en GitHub Pages
 
