@@ -121,6 +121,32 @@ check('la cabecera lleva enlace de donación',
   !!donate && /DONATE_ES\.md/.test(donate.href) && donate.inHeader, JSON.stringify(donate));
 check('el enlace abre fuera y sin filtrar la sesión',
   donate?.target === '_blank' && /noopener/.test(donate?.rel || ''), JSON.stringify(donate));
+const donatePos = await evalJs(`const d = document.querySelector('.donate').getBoundingClientRect();
+  const t = document.getElementById('themeBtn').getBoundingClientRect();
+  return { gap: Math.round(t.left - d.right), rightEdge: Math.round(window.innerWidth - t.right),
+    text: document.querySelector('.donate-text') ? getComputedStyle(document.querySelector('.donate-text')).display : 'sin span' };`);
+check('el enlace de donación va pegado al botón de tema',
+  donatePos.gap >= 0 && donatePos.gap <= 24, JSON.stringify(donatePos));
+check('y ambos quedan al borde derecho', donatePos.rightEdge <= 30, JSON.stringify(donatePos));
+check('en escritorio el enlace dice "Donar"', donatePos.text !== 'none', JSON.stringify(donatePos));
+const donateLoud = await evalJs(`const el = document.querySelector('.donate');
+  const cs = getComputedStyle(el), r = el.getBoundingClientRect();
+  const cup = getComputedStyle(el.querySelector('.cup'));
+  return { anim: cs.animationName, cupAnim: cup.animationName,
+    top: Math.round(r.top), area: Math.round(r.width * r.height),
+    bg: cs.backgroundImage.slice(0, 16) };`);
+check('el enlace de donación está en la parte de arriba', donateLoud.top < 120, JSON.stringify(donateLoud));
+check('late para que se note', donateLoud.anim !== 'none' && donateLoud.cupAnim !== 'none', JSON.stringify(donateLoud));
+check('y se ve como botón, no como texto suelto',
+  donateLoud.area >= 2800 && /gradient/.test(donateLoud.bg), JSON.stringify(donateLoud));
+
+await send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
+await sleep(200);
+check('con prefers-reduced-motion se queda quieto',
+  await evalJs("return getComputedStyle(document.querySelector('.donate')).animationName === 'none';"));
+await send('Emulation.setEmulatedMedia', { features: [] });
+
+
 
 check('la lista demo carga 10 nombres',
   await evalJs("document.getElementById('demoBtn').click(); return document.getElementById('countBadge').textContent;") === '10');
@@ -434,6 +460,16 @@ await send('Page.navigate', { url: `${BASE}/` });
 await sleep(800);
 check('el hub enlaza a la app',
   await evalJs("return !!document.querySelector('a[href=\"./apps/pokewheel/\"]');"));
+
+const hubDonate = await evalJs(`const el = document.querySelector('.donate');
+  if (!el) return null;
+  const r = el.getBoundingClientRect();
+  const footerHas = !!document.querySelector('footer .donate');
+  return { top: Math.round(r.top), anim: getComputedStyle(el).animationName,
+    inHeader: !!el.closest('.hub-top'), footerHas };`);
+check('el hub lleva el botón de donar arriba, no en el pie',
+  !!hubDonate && hubDonate.inHeader && hubDonate.top < 120 && !hubDonate.footerHas, JSON.stringify(hubDonate));
+check('y también late en el hub', hubDonate?.anim !== 'none', JSON.stringify(hubDonate));
 
 console.log(failed ? `\n${failed} FALLOS` : '\nTodo verde');
 cleanup();
