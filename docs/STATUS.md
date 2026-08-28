@@ -1,75 +1,70 @@
 # STATUS — MiniApps
 
-_Actualizado: 2026-08-28_
+_Última actualización: 2026-08-28 · rama `main` · 0 archivos sin commitear_
 
-## Qué es
+## Próxima acción
 
-Repo de minijuegos / miniapps PWA estáticas. Sin build, sin dependencias, sin backend.
-Una carpeta por app en `apps/`, hub en `index.html`.
+Construir la app de **temporizador** (`apps/timer/`) siguiendo la Fase 1 de `docs/ROADMAP.md`.
 
-- **Repo**: https://github.com/cpinan/MiniApps (público)
-- **En vivo**: https://cpinan.github.io/MiniApps/
-- **App**: https://cpinan.github.io/MiniApps/apps/pokewheel/
+## Estado
 
-## Estado: PokéRuleta funcionando y publicada
+- **Cinco apps publicadas y verificadas en producción** en https://cpinan.github.io/MiniApps/ —
+  `pokewheel` (ruleta), `teams` (equipos), `secretsanta` (amigo secreto), `typechart` (tabla de
+  tipos), `bingo` (bolillero). Cada una es PWA instalable y offline, con su service worker
+  network-first, sello de build y botón "Reparar app".
+- **Núcleo compartido** en `assets/shared/` (`base.css` + `core.js`): temas, parseo de listas,
+  azar sin sesgo, confeti, sonido y arranque PWA. `pokewheel` es la única que no lo usa: tiene su
+  propio CSS/JS porque nació antes y funciona; migrarla no es urgente.
+- **252 checks verdes** en seis suites (`npm test`), con chequeos de móvil obligatorios en todas.
+- **Donaciones**: `FUNDING.yml`, `DONATE.md`/`DONATE_ES.md` con QR de Yape/Plin, y botón dorado
+  animado arriba en el hub y en la cabecera de cada app. No hay banners ni ventanas, y las páginas
+  de donación lo prometen por escrito.
+- **Plan de lo que sigue**: `docs/ROADMAP.md`, escrito a partir de investigación de mercado
+  (categoría de pantalla de aula, sorteos en español, daily puzzles, herramientas client-side y
+  tools de PokeMMO). `docs/IDEAS.md` es la lluvia de ideas cruda.
+- Tags publicados: `v1.0.0`, `v1.1.0`, `v1.2.0`, `v1.2.1`.
 
-- Parseo flexible (coma, `;`, tab, salto de línea, CSV, viñetas; espacios solo si no hay
-  otro separador, así los nombres compuestos sobreviven).
-- Reglas: nº de intentos, quitar-al-seleccionado, ganador = último o todos, duración,
-  sonido, dedupe, mezclar.
-- Temas: 4 presets + **personalizado** con 3 colores (paleta de 8 gajos derivada en HSL).
-- Móvil: ruleta primero, limitada por alto de pantalla, táctiles 44px, inputs 16px, safe-area.
-- Sorteo con `crypto.getRandomValues` + rechazo de rango. Persistencia en `localStorage`.
-- PWA instalable, service worker **network-first** (cache-first dejaba pegada la versión vieja).
+## En vuelo
 
-## Bugs corregidos en esta sesión
+Nada en vuelo. El árbol está limpio y todo está pusheado.
 
-1. **La ruleta no giraba**: al completar los intentos, `spin()` salía por `return` y el botón
-   quedaba muerto; `restore()` recargaba esa ronda cerrada desde `localStorage`, así que tras
-   recargar la página nacía bloqueada. Ahora un clic siempre gira (abre tanda nueva o repone
-   participantes) y avisa bajo la rueda, no en el panel lateral.
-2. **Service worker cache-first**: congelaba `app.js`/`styles.css` de la primera visita.
-3. **Selectores de color siempre visibles**: `.colors{display:flex}` ganaba al `[hidden]`.
-4. **Media queries a media hoja**: por igual especificidad ganaban las reglas base y los
-   tamaños móviles no se aplicaban. Movidas al final.
+Lo siguiente, ya especificado en `docs/ROADMAP.md` §3 (Fase 1):
 
-## Verificado
+- `apps/timer/` — cuenta atrás + cronómetro, presets 1/3/5/10 min, pantalla completa para
+  proyector, aviso en los últimos 10 s, modo por turnos. Reutiliza WebAudio y temas de `core.js`.
+- `apps/dice/` — notación `2d6+3`, d4–d100, historial y suma.
+- `apps/noise/` — micrófono → semáforo con `AnalyserNode`. No graba nada; el permiso se explica
+  antes de pedirlo y la app degrada si se deniega.
+- Antes de diciembre: botón "enviar por WhatsApp" en `apps/secretsanta/` (`https://wa.me/?text=`).
 
-- `npm test` → `tests/pokewheel.test.mjs` 15/15 y `tests/browser.test.mjs` 63/63 en verde.
-  La suite de navegador prueba que la rueda **gira** de verdad (hash de píxeles del canvas),
-  el modal del ganador, el segundo giro tras cerrar la tanda, los colores personalizados y
-  que nada se desborda en 390×844 ni apaisado.
-- Sitio en producción probado con Chrome headless: gira, corona ganador y registra el SW.
+## Verificar
 
-## Añadido después de publicar
+```bash
+tools/verify.sh          # = npm test: 6 suites, 252 checks
+python3 -m http.server 8181   # y abrir http://localhost:8181/
+```
 
-- Celebración del ganador (anillo + confeti; final con oro, estrellas, serpentinas, trofeo,
-  fanfarria larga y nombre letra a letra). `prefers-reduced-motion` la deja estática.
-- Cargar lista reinicia todo: corta el giro en curso por contador de generación, cierra modal,
-  limpia confeti y devuelve la rueda a rotación cero.
-- Pokébola click-only con estados idle / hover / pressed / disabled + anillo de foco.
-- Watchdog: si un giro se corta a medias, el botón se libera solo.
-- Service worker auto-actualizable (`controllerchange` → una recarga) y sello de build visible.
-- Bug corregido: en la celebración final el nombre salía invisible (`background-clip:text` en el
-  `<h2>` con las letras en `<span>` hijos). Ahora es oro con brillo pulsante.
+## Preguntas abiertas
 
-## Última tanda de cambios (build 2026-08-28.3)
+- **Pendiente del usuario**: activar *Settings → General → Features → Sponsorships* en
+  github.com/cpinan/MiniApps. Sin ese tick, GitHub ignora `.github/FUNDING.yml` y no dibuja el
+  botón *Sponsor*.
+- ¿Se migra `pokewheel` al núcleo compartido, o se deja como está?
 
-- **Botón "Reparar app"** junto al sello de build: desregistra service workers, borra todas las
-  cachés y recarga con `?v=` para saltar también la caché HTTP. Es la salida cuando un SW viejo
-  dejó pegada una versión con bugs — justo lo que pasó en `localhost:8123` tras matar el server.
-- **La celebración ya se ve**: el confeti se dibujaba en un canvas recortado a la rueda y el
-  modal lo tapaba al instante. Ahora es una capa `position:fixed` a pantalla completa con
-  `z-index:40` (por encima del modal, `z-index:20`), la pokébola y la flecha rebotan al coronar,
-  y el modal espera 520 ms para que se vea el estallido.
-- **Tema PokeMMO**: navy oscuro, paneles pizarra, acento cian, ámbar de detalle y 8 gajos con
-  aire de tipos. Solo colores, sin assets ni afiliación.
+## No repetir
 
-## Siguiente acción
-
-Decidir la segunda miniapp (el hub ya tiene la tarjeta "Próximamente").
-
-## Ideas pendientes
-
-- Compartir resultado por link/imagen.
-- Sonidos y sprite de pokébola girando en el centro.
+- **No servir el proyecto en un puerto y luego matar el servidor**: el service worker queda
+  registrado en ese origen y la pestaña se sigue sirviendo la versión vieja desde caché para
+  siempre. Fue el "la ruleta no gira" que costó dos rondas de depuración. Salida: el botón
+  *Reparar app*, o cambiar de puerto.
+- **No apuntar `--user-data-dir` de Chrome dentro del repo**: metió 2767 archivos basura en cuatro
+  commits y rompió `git add` a mitad de una escritura. Los perfiles van a `os.tmpdir()`
+  (`tests/lib/cdp.mjs`).
+- **No confiar en `[hidden]` sin más**: cualquier `.clase{display:…}` lo derrota por especificidad.
+  `assets/shared/base.css` ya fuerza `[hidden]{display:none !important}`.
+- **No poner media queries a media hoja**: por igual especificidad ganan las reglas base y los
+  tamaños móviles no se aplican. Van al final del archivo.
+- **No usar `background-clip:text` con el texto partido en `<span>` hijos**: heredan
+  `-webkit-text-fill-color:transparent` y el texto desaparece.
+- **No verificar producción con URLs construidas a mano**: un `//` de más hace medir la página
+  equivocada y parece un despliegue roto que no lo está.
