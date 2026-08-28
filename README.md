@@ -61,7 +61,7 @@ Sin dependencias: `node` y (para la suite de navegador) Chrome instalado.
 - **`tests/pokewheel.test.mjs`** — extrae las funciones puras de `app.js` (parseo, aleatoriedad,
   matemática del giro): 15 casos, incluidos 1600 giros comprobando que la flecha cae siempre en
   el segmento elegido.
-- **`tests/browser.test.mjs`** — Chrome headless por CDP, 49 casos: que la rueda **gira** de
+- **`tests/browser.test.mjs`** — Chrome headless por CDP, 63 casos: que la rueda **gira** de
   verdad (hash de píxeles del canvas cambiando a mitad del giro), el modal del ganador, volver a
   girar tras cerrar una tanda (cinco giros con clics de ratón reales), la celebración del
   ganador, que cargar lista reinicia el sorteo, los estados del botón, los colores

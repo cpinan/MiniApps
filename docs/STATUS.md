@@ -35,7 +35,7 @@ Una carpeta por app en `apps/`, hub en `index.html`.
 
 ## Verificado
 
-- `npm test` → `tests/pokewheel.test.mjs` 15/15 y `tests/browser.test.mjs` 49/49 en verde.
+- `npm test` → `tests/pokewheel.test.mjs` 15/15 y `tests/browser.test.mjs` 63/63 en verde.
   La suite de navegador prueba que la rueda **gira** de verdad (hash de píxeles del canvas),
   el modal del ganador, el segundo giro tras cerrar la tanda, los colores personalizados y
   que nada se desborda en 390×844 ni apaisado.
@@ -52,6 +52,18 @@ Una carpeta por app en `apps/`, hub en `index.html`.
 - Service worker auto-actualizable (`controllerchange` → una recarga) y sello de build visible.
 - Bug corregido: en la celebración final el nombre salía invisible (`background-clip:text` en el
   `<h2>` con las letras en `<span>` hijos). Ahora es oro con brillo pulsante.
+
+## Última tanda de cambios (build 2026-08-28.3)
+
+- **Botón "Reparar app"** junto al sello de build: desregistra service workers, borra todas las
+  cachés y recarga con `?v=` para saltar también la caché HTTP. Es la salida cuando un SW viejo
+  dejó pegada una versión con bugs — justo lo que pasó en `localhost:8123` tras matar el server.
+- **La celebración ya se ve**: el confeti se dibujaba en un canvas recortado a la rueda y el
+  modal lo tapaba al instante. Ahora es una capa `position:fixed` a pantalla completa con
+  `z-index:40` (por encima del modal, `z-index:20`), la pokébola y la flecha rebotan al coronar,
+  y el modal espera 520 ms para que se vea el estallido.
+- **Tema PokeMMO**: navy oscuro, paneles pizarra, acento cian, ámbar de detalle y 8 gajos con
+  aire de tipos. Solo colores, sin assets ni afiliación.
 
 ## Siguiente acción
 
