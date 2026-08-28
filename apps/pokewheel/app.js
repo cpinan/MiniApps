@@ -225,14 +225,36 @@ function burst() {
 /* ================= giro ================= */
 const easeOut = (t) => 1 - Math.pow(1 - t, 4);
 
+function totalRounds() { return Math.max(1, parseInt($('rounds').value, 10) || 1); }
+
+// Un clic SIEMPRE gira. Si la tanda anterior ya terminó o la ruleta se quedó sin
+// nombres, arranca una tanda nueva en vez de quedarse muda (antes el botón moría
+// para siempre y el aviso era una línea de texto que nadie ve).
+function prepareSpin() {
+  if (state.names.length === 0) {
+    if (state.removed.length === 0) {
+      flashRound('Ruleta vacía — carga una lista primero');
+      status('Carga participantes antes de girar.');
+      return false;
+    }
+    resetDraw();
+    status('Volvieron todos los participantes: tanda nueva.');
+    return true;
+  }
+  if (state.round >= totalRounds()) {
+    state.round = 0;
+    state.history = [];
+    renderHistory();
+    status('Tanda nueva.');
+  }
+  return true;
+}
+
 function spin() {
   if (state.spinning) return;
+  if (!prepareSpin()) return;
+
   const n = state.names.length;
-  if (n === 0) { status('No hay participantes en la ruleta.'); return; }
-
-  const total = Math.max(1, parseInt($('rounds').value, 10) || 1);
-  if (state.round >= total) { status(`Ya completaste los ${total} intento(s). Reinicia para volver a sortear.`); return; }
-
   const winner = randomInt(n);
   const step = TAU / n;
   // rotación tal que el centro del segmento ganador quede bajo la flecha (-90°)
@@ -292,7 +314,7 @@ function finishSpin(expected) {
 
 /* ================= modal ================= */
 function showWinner(name) {
-  const total = Math.max(1, parseInt($('rounds').value, 10) || 1);
+  const total = totalRounds();
   const done = state.round >= total || state.names.length === 0;
   const mode = $('winnerMode').value;
 
@@ -308,8 +330,8 @@ function showWinner(name) {
     $('modalList').hidden = true;
   }
 
-  $('againBtn').hidden = done;
-  $('againBtn').textContent = 'Siguiente giro';
+  $('againBtn').hidden = false;
+  $('againBtn').textContent = done ? 'Nuevo sorteo' : 'Siguiente giro';
   $('modal').hidden = false;
   $('closeBtn').focus();
   updateRound();
@@ -325,9 +347,24 @@ function escapeHtml(s) {
 /* ================= UI ================= */
 function status(msg) { $('statusLine').textContent = msg; }
 
+// Aviso donde el usuario está mirando: bajo la ruleta, no en el panel lateral.
+let flashTimer = 0;
+function flashRound(msg) {
+  const el = $('roundLine');
+  el.textContent = msg;
+  el.classList.add('flash');
+  clearTimeout(flashTimer);
+  flashTimer = setTimeout(() => { el.classList.remove('flash'); updateRound(); }, 2000);
+}
+
 function updateRound() {
-  const total = Math.max(1, parseInt($('rounds').value, 10) || 1);
-  $('roundLine').textContent = `Ronda ${state.round} / ${total} · ${state.names.length} en la ruleta`;
+  const total = totalRounds();
+  const done = state.round >= total;
+  $('roundLine').textContent = state.names.length === 0
+    ? 'Ruleta vacía — carga una lista'
+    : done
+      ? `Sorteo completo (${total}) · pulsa para otra tanda`
+      : `Ronda ${state.round} / ${total} · ${state.names.length} en la ruleta`;
   $('countBadge').textContent = state.names.length;
   $('histBadge').textContent = state.history.length;
 }
@@ -394,6 +431,7 @@ function restore() {
   $('sound').checked = cfg.sound !== false;
   $('dedupe').checked = cfg.dedupe !== false;
   $('shuffle').checked = !!cfg.shuffle;
+  if (state.round >= totalRounds()) state.round = 0; // tanda ya cerrada: empezar limpia
 }
 
 /* ================= eventos ================= */
@@ -415,6 +453,8 @@ $('copyBtn').addEventListener('click', async () => {
   catch (_) { status('No se pudo copiar (permiso del navegador).'); }
 });
 $('spinBtn').addEventListener('click', spin);
+canvas.addEventListener('click', spin);
+canvas.style.cursor = 'pointer';
 $('againBtn').addEventListener('click', () => { $('modal').hidden = true; spin(); });
 $('closeBtn').addEventListener('click', () => { $('modal').hidden = true; });
 $('modal').addEventListener('click', (e) => { if (e.target === $('modal')) $('modal').hidden = true; });
