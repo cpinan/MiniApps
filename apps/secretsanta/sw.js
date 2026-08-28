@@ -1,7 +1,7 @@
 /* Repartidor de equipos — service worker network-first (la caché es solo respaldo offline). */
 const CACHE = 'secretsanta-v1';
 const ASSETS = [
-  './', './index.html', './styles.css', './app.js', './manifest.webmanifest',
+  './', './index.html', './styles.css', './app.js', './draw.js', './manifest.webmanifest',
   '../../assets/shared/base.css', '../../assets/shared/core.js',
   './icons/icon-192.png', './icons/icon-512.png', './icons/favicon.svg',
 ];

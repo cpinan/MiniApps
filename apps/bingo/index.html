@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Bolillero</title>
+<meta name="description" content="Bolillero de bingo: saca números sin repetir, los canta en voz alta y deja el tablero a la vista. Funciona sin conexión.">
+<meta name="theme-color" content="#ee1515">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;700;900&display=swap">
+<link rel="stylesheet" href="../../assets/shared/base.css">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body data-theme="pokemon">
+
+<header class="topbar">
+  <a class="back" href="../../index.html" title="Volver a MiniApps">&#8592;</a>
+  <h1 class="logo"><span class="logo-ball" aria-hidden="true"></span> Bolillero</h1>
+  <button id="themeBtn" class="ghost" type="button" title="Cambiar tema">Tema</button>
+</header>
+
+<main class="layout">
+
+  <section class="panel" aria-label="Configuración">
+    <details class="block" open>
+      <summary>1 · Partida</summary>
+      <label class="field">
+        <span>Números</span>
+        <select id="range">
+          <option value="75">1 a 75 (bingo americano)</option>
+          <option value="90" selected>1 a 90 (bingo clásico)</option>
+          <option value="50">1 a 50</option>
+          <option value="30">1 a 30</option>
+        </select>
+      </label>
+      <label class="check"><input type="checkbox" id="voice" checked> Cantar los números en voz alta</label>
+      <label class="check"><input type="checkbox" id="sound" checked> Sonido</label>
+      <label class="field">
+        <span>Automático cada <b id="autoLabel">5 s</b></span>
+        <input type="range" id="autoSecs" min="2" max="20" step="1" value="5">
+      </label>
+      <label class="check"><input type="checkbox" id="auto"> Sacar solo (automático)</label>
+    </details>
+
+    <details class="block" open>
+      <summary>2 · Historial <span id="drawnBadge" class="badge">0</span></summary>
+      <ol id="history" class="history"><li class="empty">Todavía no salió ninguno.</li></ol>
+      <div class="row">
+        <button id="resetBtn" class="ghost danger" type="button">Reiniciar partida</button>
+        <button id="copyBtn" class="ghost" type="button">Copiar salidos</button>
+      </div>
+    </details>
+
+    <details class="block">
+      <summary>3 · Apariencia</summary>
+      <label class="field">
+        <span>Tema</span>
+        <select id="theme">
+          <option value="pokemon">Pokémon</option>
+          <option value="pokemmo">PokeMMO</option>
+          <option value="neon">Neón</option>
+          <option value="pastel">Pastel</option>
+          <option value="mono">Mono</option>
+          <option value="custom">Personalizado…</option>
+        </select>
+      </label>
+      <div id="customColors" class="colors" hidden>
+        <label class="swatch"><input type="color" id="col1" value="#ee1515"><span>Color A</span></label>
+        <label class="swatch"><input type="color" id="col2" value="#3b4cca"><span>Color B</span></label>
+        <label class="swatch"><input type="color" id="col3" value="#ffcb05"><span>Detalle</span></label>
+        <button id="randomColors" class="ghost" type="button">Al azar</button>
+      </div>
+    </details>
+
+    <p class="hint" id="statusLine">Pulsa la bola para sacar el primero.</p>
+    <div class="footer-row">
+      <span class="hint build" id="buildTag"></span>
+      <button id="repairBtn" class="ghost tiny" type="button"
+        title="Borra la caché y el service worker, y recarga la última versión">Reparar app</button>
+    </div>
+  </section>
+
+  <section class="stage" aria-label="Bolillero">
+    <button id="drawBtn" class="ball-btn" type="button" aria-label="Sacar un número">
+      <span class="ball-face" id="current" aria-live="polite">—</span>
+    </button>
+    <p class="counter" id="counterLine">0 de 90 · quedan 90</p>
+    <div class="last" id="lastNumbers" aria-label="Últimos números"></div>
+    <div class="board" id="board" aria-label="Tablero"></div>
+  </section>
+</main>
+
+<canvas id="fx" class="fx" aria-hidden="true"></canvas>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

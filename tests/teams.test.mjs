@@ -1,24 +1,11 @@
 /** Repartidor de equipos: lógica pura + navegador. */
-import { readFileSync } from 'fs';
 import { launch, reporter, sleep } from './lib/cdp.mjs';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 const { check, done } = reporter();
 
-/* ---------------- lógica pura: se importa el módulo real ---------------- */
-// `split` no toca el DOM, así que se puede importar tal cual.
-const { split } = await import('../apps/teams/app.js').catch(async () => {
-  // app.js arranca la UI al importarse; para el test se extrae solo `split`.
-  const src = readFileSync(new URL('../apps/teams/app.js', import.meta.url), 'utf8');
-  const start = src.indexOf('const norm =');
-  const end = src.indexOf('/* ================= estado y UI');
-  const mod = src.slice(start, end)
-    .replace(/export function split/, 'function split');
-  const helpers = readFileSync(new URL('../assets/shared/core.js', import.meta.url), 'utf8')
-    .replace(/export /g, '');
-  const fn = new Function(`${helpers}\n${mod}\nreturn { split, parseApart };`);
-  return fn();
-});
+/* ---------------- lógica pura ---------------- */
+import { split } from '../apps/teams/split.js';
 
 const names = (n) => Array.from({ length: n }, (_, i) => `P${i + 1}`);
 const sizes = (teams) => teams.map(t => t.length).sort((a, b) => a - b);

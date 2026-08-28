@@ -1,7 +1,7 @@
 /* Repartidor de equipos — service worker network-first (la caché es solo respaldo offline). */
-const CACHE = 'teams-v1';
+const CACHE = 'bingo-v1';
 const ASSETS = [
-  './', './index.html', './styles.css', './app.js', './split.js', './manifest.webmanifest',
+  './', './index.html', './styles.css', './app.js', './draw.js', './manifest.webmanifest',
   '../../assets/shared/base.css', '../../assets/shared/core.js',
   './icons/icon-192.png', './icons/icon-512.png', './icons/favicon.svg',
 ];

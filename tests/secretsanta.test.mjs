@@ -1,16 +1,11 @@
 /** Amigo secreto: propiedades del sorteo + navegador (organizador y sobre). */
-import { readFileSync } from 'fs';
 import { launch, reporter, sleep } from './lib/cdp.mjs';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 const { check, done } = reporter();
 
 /* ---------------- lógica pura ---------------- */
-const src = readFileSync(new URL('../apps/secretsanta/app.js', import.meta.url), 'utf8');
-const core = readFileSync(new URL('../assets/shared/core.js', import.meta.url), 'utf8').replace(/export /g, '');
-const logic = src.slice(src.indexOf('const norm ='), src.indexOf('/* ================= links'))
-  .replace(/export /g, '');
-const { draw, parsePairs } = new Function(`${core}\n${logic}\nreturn { draw, parsePairs };`)();
+import { draw, parsePairs } from '../apps/secretsanta/draw.js';
 
 const names = (n) => Array.from({ length: n }, (_, i) => `P${i + 1}`);
 
