@@ -111,7 +111,23 @@ button:active{transform:translateY(1px)}
 /* ---------- modal ---------- */
 .modal{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);padding:20px}
 .modal[hidden]{display:none}
-.modal-card{background:var(--bg2);border:1px solid var(--line);border-radius:22px;padding:26px 24px;max-width:440px;width:100%;
+.rays{position:absolute;inset:-60%;pointer-events:none;opacity:.14;
+  background:conic-gradient(from 0deg, transparent 0 7deg, var(--gold) 7deg 10deg, transparent 10deg 20deg);
+  animation:rays 16s linear infinite}
+.modal-card.final .rays{opacity:.3}
+@keyframes rays{to{transform:rotate(360deg)}}
+.trophy{font-size:38px;line-height:1;margin-bottom:6px;animation:hop .7s cubic-bezier(.3,1.5,.5,1) 2}
+.trophy[hidden]{display:none}
+@keyframes hop{0%,100%{transform:translateY(0) scale(1)}45%{transform:translateY(-12px) scale(1.12)}}
+.ltr{display:inline-block;animation:ltrIn .5s cubic-bezier(.2,1.7,.4,1) both}
+@keyframes ltrIn{from{opacity:0;transform:translateY(-16px) scale(.4) rotate(-10deg)}to{opacity:1;transform:none}}
+.modal-card.final .modal-title{color:var(--gold);animation:glow 1.8s ease-in-out infinite}
+@keyframes glow{
+  0%,100%{text-shadow:0 0 10px color-mix(in srgb,var(--gold) 55%, transparent),0 2px 0 rgba(0,0,0,.5)}
+  50%{text-shadow:0 0 26px var(--gold),0 0 44px color-mix(in srgb,var(--gold) 45%, transparent),0 2px 0 rgba(0,0,0,.5)}}
+.modal-card>*:not(.rays){position:relative;z-index:1}
+
+.modal-card{position:relative;overflow:hidden;background:var(--bg2);border:1px solid var(--line);border-radius:22px;padding:26px 24px;max-width:440px;width:100%;
   text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.6);animation:pop .28s cubic-bezier(.2,1.4,.4,1)}
 @keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
 .modal-kicker{font-family:var(--pixel);font-size:9px;color:var(--accent);margin:0 0 12px;letter-spacing:1px}
@@ -147,6 +163,8 @@ button:active{transform:translateY(1px)}
   .wheel-wrap{width:min(46vw,62vh)}
 }
 @media(prefers-reduced-motion:reduce){
+  .rays,.trophy,.ltr{animation:none}
+  .modal-card.final .modal-title{color:var(--gold);animation:none;text-shadow:0 0 12px color-mix(in srgb,var(--gold) 50%, transparent)}
   .modal-card{animation:none}
   .round.flash{animation:none}
   .card,button{transition:none}

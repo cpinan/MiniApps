@@ -185,6 +185,44 @@ check('tras cinco giros quedan 5 participantes',
 check('el sello de build es visible',
   /build/.test(await evalJs("return document.getElementById('buildTag').textContent;")));
 
+/* ---------------- 3c. celebración del ganador ---------------- */
+await load();
+await evalJs("document.getElementById('demoBtn').click(); return 1;");
+await setDuration(2);
+await evalJs(`const r = document.getElementById('rounds'); r.value = 2; r.dispatchEvent(new Event('change')); return 1;`);
+
+await evalJs("document.getElementById('spinBtn').click(); return 1;");
+await sleep(2600);
+const party = await evalJs(`const f = document.getElementById('fx');
+  const d = f.getContext('2d').getImageData(0, 0, f.width, f.height).data;
+  let painted = 0; for (let i = 3; i < d.length; i += 40) if (d[i] > 8) painted++;
+  return { painted,
+    final: document.getElementById('modalCard').classList.contains('final'),
+    trophy: !document.getElementById('trophy').hidden,
+    letters: document.querySelectorAll('#modalTitle .ltr').length };`);
+check('el confeti se dibuja al ganar una ronda', party.painted > 0, `píxeles pintados: ${party.painted}`);
+check('el nombre entra letra a letra', party.letters > 0, `letras: ${party.letters}`);
+check('ronda intermedia: sin trofeo ni tema dorado', !party.final && !party.trophy);
+
+await evalJs("document.getElementById('againBtn').click(); return 1;");
+await sleep(2800);
+const grand = await evalJs(`const f = document.getElementById('fx');
+  const d = f.getContext('2d').getImageData(0, 0, f.width, f.height).data;
+  let painted = 0; for (let i = 3; i < d.length; i += 40) if (d[i] > 8) painted++;
+  return { painted,
+    final: document.getElementById('modalCard').classList.contains('final'),
+    trophy: !document.getElementById('trophy').hidden,
+    kicker: document.getElementById('modalKicker').textContent };`);
+check('último giro: celebración final con trofeo', grand.final && grand.trophy, JSON.stringify(grand));
+const legible = await evalJs(`const sp = document.querySelector('#modalTitle .ltr');
+  const cs = sp ? getComputedStyle(sp) : null;
+  return cs ? { fill: cs.webkitTextFillColor || cs.color, text: document.getElementById('modalTitle').textContent } : null;`);
+check('el nombre del ganador se ve en la celebración final',
+  !!legible && !/transparent|rgba\(0, 0, 0, 0\)/.test(legible.fill) && legible.text.length > 0,
+  JSON.stringify(legible));
+check('último giro: el cartel anuncia el final', /terminado/i.test(grand.kicker), grand.kicker);
+check('la celebración final también pinta', grand.painted > 0, `píxeles: ${grand.painted}`);
+
 /* ---------------- 4. ruleta vacía: avisa, no se cuelga ---------------- */
 await evalJs(`document.getElementById('modal').hidden = true;
   document.getElementById('clearBtn').click();

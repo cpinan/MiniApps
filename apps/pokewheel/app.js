@@ -253,10 +253,13 @@ function tick() {
   g.gain.exponentialRampToValueAtTime(0.001, a.currentTime + 0.05);
   o.connect(g).connect(a.destination); o.start(); o.stop(a.currentTime + 0.06);
 }
-function fanfare() {
+function fanfare(kind) {
   if (!$('sound').checked) return;
   const a = ac();
-  [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => {
+  const notes = kind === 'final'
+    ? [523.25, 659.25, 783.99, 1046.5, 1318.5, 1046.5, 1318.5, 1568]
+    : [523.25, 659.25, 783.99, 1046.5];
+  notes.forEach((f, i) => {
     const o = a.createOscillator(), g = a.createGain(), t = a.currentTime + i * 0.11;
     o.type = 'triangle'; o.frequency.value = f;
     g.gain.setValueAtTime(0.0001, t);
@@ -266,33 +269,103 @@ function fanfare() {
   });
 }
 
-/* ================= confeti ================= */
-let confetti = [], fxRaf = 0;
-function burst() {
-  const colors = paletteColors();
-  confetti = Array.from({ length: 90 }, () => ({
-    x: size / 2, y: size / 2,
-    vx: (Math.random() - 0.5) * 9, vy: -Math.random() * 9 - 2,
-    s: 4 + Math.random() * 6, r: Math.random() * TAU, vr: (Math.random() - 0.5) * 0.3,
-    c: colors[Math.floor(Math.random() * colors.length)], life: 1,
-  }));
-  cancelAnimationFrame(fxRaf);
+/* ================= celebración ================= */
+const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const GOLD = ['#FFD700', '#FFCB05', '#FFF3B0', '#FF9F1C'];
+
+let fxItems = [], fxRings = [], fxRaf = 0;
+
+function spawnBurst(colors, n, opt = {}) {
+  const cx = size / 2, cy = size / 2;
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * TAU;
+    const sp = (opt.speed || 6) * (0.4 + Math.random());
+    fxItems.push({
+      x: cx + Math.cos(a) * size * 0.09, y: cy + Math.sin(a) * size * 0.09,
+      vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 3.2,
+      s: 4 + Math.random() * 7, rot: Math.random() * TAU, vr: (Math.random() - 0.5) * 0.35,
+      c: colors[Math.floor(Math.random() * colors.length)],
+      life: 1, decay: 0.005 + Math.random() * 0.006,
+      star: Math.random() < (opt.stars || 0),
+      streamer: Math.random() < (opt.streamers || 0),
+    });
+  }
+}
+
+function spawnRing(color) { fxRings.push({ r: size * 0.11, a: 0.6, c: color }); }
+
+function drawStar(g, r) {
+  g.beginPath();
+  for (let i = 0; i < 8; i++) {
+    const rad = i % 2 ? r * 0.38 : r;
+    const ang = (i / 8) * TAU - Math.PI / 2;
+    g[i ? 'lineTo' : 'moveTo'](Math.cos(ang) * rad, Math.sin(ang) * rad);
+  }
+  g.closePath(); g.fill();
+}
+
+function runFx() {
+  if (fxRaf) return;
   const step = () => {
     fxCtx.clearRect(0, 0, size, size);
-    let alive = 0;
-    for (const p of confetti) {
-      p.vy += 0.22; p.x += p.vx; p.y += p.vy; p.r += p.vr; p.life -= 0.008;
-      if (p.life <= 0 || p.y > size + 20) continue;
-      alive++;
-      fxCtx.save(); fxCtx.translate(p.x, p.y); fxCtx.rotate(p.r);
-      fxCtx.globalAlpha = Math.max(0, p.life);
-      fxCtx.fillStyle = p.c; fxCtx.fillRect(-p.s / 2, -p.s / 2, p.s, p.s * 0.6);
+
+    for (const ring of fxRings) {
+      ring.r += size * 0.014;
+      ring.a -= 0.013;
+      if (ring.a <= 0) continue;
+      fxCtx.save();
+      fxCtx.globalAlpha = ring.a;
+      fxCtx.strokeStyle = ring.c;
+      fxCtx.lineWidth = Math.max(2, size * 0.012 * ring.a * 2);
+      fxCtx.beginPath();
+      fxCtx.arc(size / 2, size / 2, ring.r, 0, TAU);
+      fxCtx.stroke();
       fxCtx.restore();
     }
-    if (alive) fxRaf = requestAnimationFrame(step);
-    else fxCtx.clearRect(0, 0, size, size);
+    fxRings = fxRings.filter(r => r.a > 0 && r.r < size);
+
+    for (const p of fxItems) {
+      p.vy += 0.2;
+      p.vx *= 0.995;
+      p.x += p.vx; p.y += p.vy;
+      p.rot += p.vr;
+      p.life -= p.decay;
+      if (p.life <= 0) continue;
+      fxCtx.save();
+      fxCtx.translate(p.x, p.y);
+      fxCtx.rotate(p.rot);
+      fxCtx.globalAlpha = Math.max(0, Math.min(1, p.life));
+      fxCtx.fillStyle = p.c;
+      if (p.star) drawStar(fxCtx, p.s * 1.1);
+      else if (p.streamer) fxCtx.fillRect(-p.s * 0.22, -p.s * 1.8, p.s * 0.44, p.s * 3.6);
+      else fxCtx.fillRect(-p.s / 2, -p.s / 2, p.s, p.s * 0.62);
+      fxCtx.restore();
+    }
+    fxItems = fxItems.filter(p => p.life > 0 && p.y < size + 60);
+
+    if (fxItems.length || fxRings.length) fxRaf = requestAnimationFrame(step);
+    else { fxRaf = 0; fxCtx.clearRect(0, 0, size, size); }
   };
   fxRaf = requestAnimationFrame(step);
+}
+
+// 'round' = un ganador más de la tanda. 'final' = se acabaron los giros: oro,
+// estrellas, serpentinas y tres oleadas.
+function celebrate(kind) {
+  if (reducedMotion()) return;
+  const base = paletteColors();
+  const colors = kind === 'final' ? GOLD.concat(base.slice(0, 3)) : base;
+  spawnRing(kind === 'final' ? GOLD[0] : base[0]);
+  spawnBurst(colors, kind === 'final' ? 130 : 85,
+    kind === 'final' ? { stars: 0.35, streamers: 0.25, speed: 7 } : { stars: 0.12 });
+  runFx();
+  if (kind === 'final') {
+    [420, 820, 1240].forEach((t, i) => setTimeout(() => {
+      spawnRing(GOLD[i % GOLD.length]);
+      spawnBurst(colors, 70, { stars: 0.4, streamers: 0.3, speed: 7.5 });
+      runFx();
+    }, t));
+  }
 }
 
 /* ================= giro ================= */
@@ -391,11 +464,28 @@ function finishSpin(expected) {
   drawWheel();
   renderHistory();
   save();
-  burst(); fanfare();
+
+  const finalOne = state.round >= totalRounds() || state.names.length === 0;
+  celebrate(finalOne ? 'final' : 'round');
+  fanfare(finalOne ? 'final' : 'round');
   showWinner(name);
 }
 
 /* ================= modal ================= */
+// El nombre entra letra a letra: el ganador se lee, no aparece de golpe.
+function revealTitle(text) {
+  const el = $('modalTitle');
+  el.textContent = '';
+  if (reducedMotion()) { el.textContent = text; return; }
+  [...text].forEach((ch, i) => {
+    const span = document.createElement('span');
+    span.className = 'ltr';
+    span.textContent = ch === ' ' ? '\u00a0' : ch;
+    span.style.animationDelay = `${Math.min(i * 45, 900)}ms`;
+    el.appendChild(span);
+  });
+}
+
 function showWinner(name) {
   const total = totalRounds();
   const done = state.round >= total || state.names.length === 0;
@@ -403,13 +493,16 @@ function showWinner(name) {
 
   $('modalKicker').textContent = done ? '¡Sorteo terminado!' : `Ronda ${state.round} de ${total}`;
 
+  $('modalCard').classList.toggle('final', done);
+  $('trophy').hidden = !done;
+
   if (done && mode === 'all' && state.history.length > 1) {
-    $('modalTitle').textContent = 'Ganadores';
+    revealTitle('Ganadores');
     const ol = $('modalList');
     ol.innerHTML = state.history.map(h => `<li>${escapeHtml(h.name)}</li>`).join('');
     ol.hidden = false;
   } else {
-    $('modalTitle').textContent = name;
+    revealTitle(name);
     $('modalList').hidden = true;
   }
 
