@@ -4,7 +4,7 @@
 const $ = (id) => document.getElementById(id);
 const TAU = Math.PI * 2;
 const STORE = 'pokewheel.v1';
-const BUILD = '2026-08-28.2'; // se ve en consola y en el panel: sirve para saber qué versión corre
+const BUILD = '2026-08-28.3'; // se ve en consola y en el panel: sirve para saber qué versión corre
 const THEMES = ['pokemon', 'neon', 'pastel', 'mono', 'custom'];
 
 const PALETTES = {
@@ -22,6 +22,7 @@ const state = {
   rotation: 0,
   spinning: false,
   guard: 0,
+  modalTimer: 0,
   spinId: 0,   // corta el giro en curso si se recarga la lista a mitad
 };
 
@@ -77,18 +78,30 @@ const canvas = $('wheel');
 const ctx = canvas.getContext('2d');
 const fx = $('fx');
 const fxCtx = fx.getContext('2d');
-let size = 520;
+let size = 520;          // lado del canvas de la rueda, en px CSS
+let fxW = 0, fxH = 0;    // la capa de confeti cubre toda la ventana
 
 function resizeCanvas() {
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   const css = canvas.clientWidth || 520;
   size = css;
-  for (const [c, cx] of [[canvas, ctx], [fx, fxCtx]]) {
-    c.width = Math.round(css * dpr);
-    c.height = Math.round(css * dpr);
-    cx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  }
+  canvas.width = Math.round(css * dpr);
+  canvas.height = Math.round(css * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  fxW = window.innerWidth;
+  fxH = window.innerHeight;
+  fx.width = Math.round(fxW * dpr);
+  fx.height = Math.round(fxH * dpr);
+  fxCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
   drawWheel();
+}
+
+// Centro de la rueda en coordenadas de ventana: de ahí sale el confeti.
+function wheelCenter() {
+  const r = canvas.getBoundingClientRect();
+  return { x: r.left + r.width / 2, y: r.top + r.height / 2, r: r.width / 2 };
 }
 
 function hexToHsl(hex) {
@@ -277,12 +290,12 @@ const GOLD = ['#FFD700', '#FFCB05', '#FFF3B0', '#FF9F1C'];
 let fxItems = [], fxRings = [], fxRaf = 0;
 
 function spawnBurst(colors, n, opt = {}) {
-  const cx = size / 2, cy = size / 2;
+  const { x: cx, y: cy, r: rad } = wheelCenter();
   for (let i = 0; i < n; i++) {
     const a = Math.random() * TAU;
     const sp = (opt.speed || 6) * (0.4 + Math.random());
     fxItems.push({
-      x: cx + Math.cos(a) * size * 0.09, y: cy + Math.sin(a) * size * 0.09,
+      x: cx + Math.cos(a) * rad * 0.18, y: cy + Math.sin(a) * rad * 0.18,
       vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 3.2,
       s: 4 + Math.random() * 7, rot: Math.random() * TAU, vr: (Math.random() - 0.5) * 0.35,
       c: colors[Math.floor(Math.random() * colors.length)],
@@ -293,7 +306,10 @@ function spawnBurst(colors, n, opt = {}) {
   }
 }
 
-function spawnRing(color) { fxRings.push({ r: size * 0.11, a: 0.6, c: color }); }
+function spawnRing(color) {
+  const { x, y, r } = wheelCenter();
+  fxRings.push({ x, y, r: r * 0.22, max: r * 2.2, grow: r * 0.028, a: 0.6, c: color });
+}
 
 function drawStar(g, r) {
   g.beginPath();
@@ -308,10 +324,10 @@ function drawStar(g, r) {
 function runFx() {
   if (fxRaf) return;
   const step = () => {
-    fxCtx.clearRect(0, 0, size, size);
+    fxCtx.clearRect(0, 0, fxW, fxH);
 
     for (const ring of fxRings) {
-      ring.r += size * 0.014;
+      ring.r += ring.grow;
       ring.a -= 0.013;
       if (ring.a <= 0) continue;
       fxCtx.save();
@@ -319,11 +335,11 @@ function runFx() {
       fxCtx.strokeStyle = ring.c;
       fxCtx.lineWidth = Math.max(2, size * 0.012 * ring.a * 2);
       fxCtx.beginPath();
-      fxCtx.arc(size / 2, size / 2, ring.r, 0, TAU);
+      fxCtx.arc(ring.x, ring.y, ring.r, 0, TAU);
       fxCtx.stroke();
       fxCtx.restore();
     }
-    fxRings = fxRings.filter(r => r.a > 0 && r.r < size);
+    fxRings = fxRings.filter(r => r.a > 0 && r.r < r.max);
 
     for (const p of fxItems) {
       p.vy += 0.2;
@@ -342,10 +358,10 @@ function runFx() {
       else fxCtx.fillRect(-p.s / 2, -p.s / 2, p.s, p.s * 0.62);
       fxCtx.restore();
     }
-    fxItems = fxItems.filter(p => p.life > 0 && p.y < size + 60);
+    fxItems = fxItems.filter(p => p.life > 0 && p.y < fxH + 60);
 
     if (fxItems.length || fxRings.length) fxRaf = requestAnimationFrame(step);
-    else { fxRaf = 0; fxCtx.clearRect(0, 0, size, size); }
+    else { fxRaf = 0; fxCtx.clearRect(0, 0, fxW, fxH); }
   };
   fxRaf = requestAnimationFrame(step);
 }
@@ -471,7 +487,15 @@ function finishSpin(expected) {
   const finalOne = state.round >= totalRounds() || state.names.length === 0;
   celebrate(finalOne ? 'final' : 'round');
   fanfare(finalOne ? 'final' : 'round');
-  showWinner(name);
+
+  // La pokébola y la flecha festejan, y el modal entra medio segundo después:
+  // si sale al instante tapa la celebración y parece que no hubiera animación.
+  const ball = $('spinBtn'), arrow = document.querySelector('.pointer');
+  ball.classList.add('win'); arrow.classList.add('win');
+  setTimeout(() => { ball.classList.remove('win'); arrow.classList.remove('win'); }, 1400);
+
+  clearTimeout(state.modalTimer);
+  state.modalTimer = setTimeout(() => showWinner(name), reducedMotion() ? 0 : 520);
 }
 
 // Deja la ruleta como recién abierta: sin giro en curso, sin modal, sin confeti.
@@ -482,7 +506,10 @@ function stopEverything() {
   clearTimeout(flashTimer);
   cancelAnimationFrame(fxRaf);
   fxRaf = 0; fxItems = []; fxRings = [];
-  fxCtx.clearRect(0, 0, size, size);
+  fxCtx.clearRect(0, 0, fxW, fxH);
+  $('spinBtn').classList.remove('win');
+  document.querySelector('.pointer').classList.remove('win');
+  clearTimeout(state.modalTimer);
   state.rotation = 0;
   $('spinBtn').disabled = false;
   $('modal').hidden = true;
@@ -664,6 +691,26 @@ document.addEventListener('keydown', (e) => {
 $('duration').addEventListener('input', () => { $('durLabel').textContent = $('duration').value + ' s'; save(); });
 ['rounds', 'removePicked', 'winnerMode', 'sound', 'dedupe', 'shuffle'].forEach(id =>
   $(id).addEventListener('change', () => { updateRound(); save(); }));
+// Salida de emergencia: un service worker viejo puede servir una versión con bugs
+// desde la caché para siempre. Esto lo borra todo y recarga la última.
+$('repairBtn').addEventListener('click', async () => {
+  $('repairBtn').disabled = true;
+  status('Reparando: borrando caché y service worker…');
+  try {
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r => r.unregister()));
+    }
+    if (window.caches) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => caches.delete(k)));
+    }
+  } catch (_) { /* da igual: recargamos igual */ }
+  const url = new URL(location.href);
+  url.searchParams.set('v', Date.now().toString(36)); // salta también la caché HTTP
+  location.replace(url.toString());
+});
+
 $('themeBtn').addEventListener('click', () => {
   const i = THEMES.indexOf(document.body.dataset.theme);
   applyTheme(THEMES[(i + 1) % THEMES.length]);

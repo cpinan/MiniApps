@@ -76,7 +76,7 @@ const send = (method, params = {}) => new Promise(res => {
   ws.send(JSON.stringify({ id, method, params }));
 });
 const evalJs = async (expr) => {
-  const r = await send('Runtime.evaluate', { expression: `(() => { ${expr} })()`, returnByValue: true, awaitPromise: true });
+  const r = await send('Runtime.evaluate', { expression: `(async () => { ${expr} })()`, returnByValue: true, awaitPromise: true });
   if (r.result?.exceptionDetails) throw new Error(r.result.exceptionDetails.exception?.description || 'error en evaluate');
   return r.result?.result?.value;
 };
@@ -222,6 +222,56 @@ check('el nombre del ganador se ve en la celebración final',
   JSON.stringify(legible));
 check('último giro: el cartel anuncia el final', /terminado/i.test(grand.kicker), grand.kicker);
 check('la celebración final también pinta', grand.painted > 0, `píxeles: ${grand.painted}`);
+
+/* ---------------- 3c-bis. la celebración se ve por encima del modal ---------------- */
+const layer = await evalJs(`const f = document.getElementById('fx'), cs = getComputedStyle(f);
+  const r = f.getBoundingClientRect();
+  const modalZ = parseInt(getComputedStyle(document.getElementById('modal')).zIndex, 10);
+  return { pos: cs.position, z: parseInt(cs.zIndex, 10), modalZ,
+    coversW: Math.round(r.width) >= window.innerWidth, coversH: Math.round(r.height) >= window.innerHeight,
+    clicks: cs.pointerEvents };`);
+check('el confeti cubre toda la ventana', layer.coversW && layer.coversH && layer.pos === 'fixed', JSON.stringify(layer));
+check('el confeti se dibuja por encima del modal', layer.z > layer.modalZ, `fx z${layer.z} vs modal z${layer.modalZ}`);
+check('el confeti no bloquea los clics', layer.clicks === 'none', layer.clicks);
+
+await load();
+await evalJs("document.getElementById('demoBtn').click(); return 1;");
+await setDuration(2);
+await evalJs("document.getElementById('spinBtn').click(); return 1;");
+await sleep(2150);
+const justAfter = await evalJs(`const f = document.getElementById('fx');
+  const d = f.getContext('2d').getImageData(0, 0, f.width, f.height).data;
+  let painted = 0; for (let i = 3; i < d.length; i += 400) if (d[i] > 8) painted++;
+  return { painted, modalHidden: document.getElementById('modal').hidden,
+    ball: document.getElementById('spinBtn').classList.contains('win') };`);
+check('la celebración arranca antes de que salga el modal',
+  justAfter.painted > 0 && justAfter.modalHidden === true, JSON.stringify(justAfter));
+check('la pokébola festeja al coronar', justAfter.ball === true);
+await sleep(800);
+check('el modal llega justo después',
+  await evalJs("return !document.getElementById('modal').hidden;"));
+
+/* ---------------- 3f. botón de reparación ---------------- */
+// Repara = borra service workers y cachés viejas y recarga saltándose la caché HTTP.
+// Tras recargar, la app vuelve a registrar SU service worker: eso es lo correcto.
+// Lo que debe desaparecer es la caché obsoleta, que es lo que dejaba la app pegada.
+await load();
+await sleep(600);
+const swBefore = await evalJs("return navigator.serviceWorker.getRegistrations().then(r => r.length);");
+await evalJs("await caches.open('pokewheel-vSTALE-test'); return 1;");
+const stalePresent = await evalJs("return (await caches.keys()).includes('pokewheel-vSTALE-test');");
+await evalJs("document.getElementById('repairBtn').click(); return 1;");
+await sleep(3000);
+const after = await evalJs(`return {
+  stale: (await caches.keys()).includes('pokewheel-vSTALE-test'),
+  keys: await caches.keys(),
+  url: location.search };`);
+check('antes de reparar había un service worker', swBefore >= 1, `registros: ${swBefore}`);
+check('la caché obsoleta existía antes de reparar', stalePresent === true);
+check('reparar borra la caché obsoleta', after.stale === false, JSON.stringify(after));
+check('reparar recarga saltándose la caché HTTP', /[?&]v=/.test(after.url), after.url);
+check('tras reparar la app vuelve a quedar operativa',
+  await evalJs("return !document.getElementById('spinBtn').disabled && !!document.getElementById('buildTag').textContent;"));
 
 /* ---------------- 3d. cargar lista reinicia la ruleta ---------------- */
 await load();

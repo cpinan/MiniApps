@@ -92,7 +92,11 @@
     </details>
 
     <p class="hint" id="statusLine">Carga una lista para empezar.</p>
-    <p class="hint build" id="buildTag"></p>
+    <div class="footer-row">
+      <span class="hint build" id="buildTag"></span>
+      <button id="repairBtn" class="ghost tiny" type="button"
+        title="Borra la caché y el service worker, y recarga la última versión">Reparar app</button>
+    </div>
   </section>
 
   <!-- ============ RULETA ============ -->
@@ -103,11 +107,12 @@
       <button id="spinBtn" class="spin" type="button" draggable="false" aria-label="Girar la ruleta">
         <span class="ball"><span class="ball-btn"></span></span>
       </button>
-      <canvas id="fx" class="fx" aria-hidden="true"></canvas>
     </div>
     <p class="round" id="roundLine">Ronda 0 / 1</p>
   </section>
 </main>
+
+<canvas id="fx" class="fx" aria-hidden="true"></canvas>
 
 <!-- ============ MODAL GANADOR ============ -->
 <div id="modal" class="modal" hidden>
