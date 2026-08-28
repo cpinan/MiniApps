@@ -4,40 +4,48 @@ _Actualizado: 2026-08-28_
 
 ## Qué es
 
-Repo de minijuegos / miniapps PWA estáticas para publicar en GitHub Pages y compartir por link.
-Sin build, sin dependencias, sin backend. Una carpeta por app en `apps/`, hub en `index.html`.
+Repo de minijuegos / miniapps PWA estáticas. Sin build, sin dependencias, sin backend.
+Una carpeta por app en `apps/`, hub en `index.html`.
 
-## Qué ya está hecho
+- **Repo**: https://github.com/cpinan/MiniApps (público)
+- **En vivo**: https://cpinan.github.io/MiniApps/
+- **App**: https://cpinan.github.io/MiniApps/apps/pokewheel/
 
-- **Estructura del repo**: `index.html` (hub con tarjetas), `apps/`, `assets/`, `tests/`,
-  `.nojekyll`, `LICENSE` (MIT), `README.md`.
-- **`apps/pokewheel/` — PokéRuleta** (completa y funcional):
-  - `index.html` · `styles.css` · `app.js` · `manifest.webmanifest` · `sw.js` · `icons/`
-  - Parseo flexible de nombres (coma, `;`, tab, salto de línea, CSV con comillas, viñetas;
-    fallback a espacios sólo si no hay ningún separador → los nombres compuestos sobreviven).
-  - Reglas: nº de intentos, quitar-al-seleccionado on/off, ganador = último o todos,
-    duración del giro, sonido (WebAudio, sin assets), dedupe, mezclar.
-  - 4 temas (pokemon / neon / pastel / mono) por `data-theme` + variables CSS.
-  - Ganador con `crypto.getRandomValues` + rechazo de rango (sin sesgo modular).
-  - Persistencia en `localStorage`, historial, copiar resultados, confeti, modal.
-  - PWA instalable + offline (service worker cache-first, `pokewheel-v1`).
-  - Iconos pokébola generados con PIL (192, 512, maskable 512) + favicon SVG.
+## Estado: PokéRuleta funcionando y publicada
+
+- Parseo flexible (coma, `;`, tab, salto de línea, CSV, viñetas; espacios solo si no hay
+  otro separador, así los nombres compuestos sobreviven).
+- Reglas: nº de intentos, quitar-al-seleccionado, ganador = último o todos, duración,
+  sonido, dedupe, mezclar.
+- Temas: 4 presets + **personalizado** con 3 colores (paleta de 8 gajos derivada en HSL).
+- Móvil: ruleta primero, limitada por alto de pantalla, táctiles 44px, inputs 16px, safe-area.
+- Sorteo con `crypto.getRandomValues` + rechazo de rango. Persistencia en `localStorage`.
+- PWA instalable, service worker **network-first** (cache-first dejaba pegada la versión vieja).
+
+## Bugs corregidos en esta sesión
+
+1. **La ruleta no giraba**: al completar los intentos, `spin()` salía por `return` y el botón
+   quedaba muerto; `restore()` recargaba esa ronda cerrada desde `localStorage`, así que tras
+   recargar la página nacía bloqueada. Ahora un clic siempre gira (abre tanda nueva o repone
+   participantes) y avisa bajo la rueda, no en el panel lateral.
+2. **Service worker cache-first**: congelaba `app.js`/`styles.css` de la primera visita.
+3. **Selectores de color siempre visibles**: `.colors{display:flex}` ganaba al `[hidden]`.
+4. **Media queries a media hoja**: por igual especificidad ganaban las reglas base y los
+   tamaños móviles no se aplicaban. Movidas al final.
 
 ## Verificado
 
-- `node tests/pokewheel.test.mjs` → 15/15 en verde (parseo, uniformidad del sorteo,
-  y 1600 giros comprobando que la flecha cae en el segmento elegido).
-- Cross-check: todos los `getElementById` de `app.js` existen en el HTML.
-- **Pendiente**: verificación visual en navegador. La extensión de Chrome no estaba conectada
-  durante la sesión, así que la UI nunca se abrió.
+- `npm test` → `tests/pokewheel.test.mjs` 15/15 y `tests/browser.test.mjs` 28/28 en verde.
+  La suite de navegador prueba que la rueda **gira** de verdad (hash de píxeles del canvas),
+  el modal del ganador, el segundo giro tras cerrar la tanda, los colores personalizados y
+  que nada se desborda en 390×844 ni apaisado.
+- Sitio en producción probado con Chrome headless: gira, corona ganador y registra el SW.
 
 ## Siguiente acción
 
-Servir con `python3 -m http.server 8080`, abrir `http://localhost:8080/apps/pokewheel/`,
-hacer un giro real y revisar el render (texto de segmentos con listas largas, tamaño en móvil).
-Después: commit, `gh repo create MiniApps --public --source=. --push` y activar Pages.
+Decidir la segunda miniapp (el hub ya tiene la tarjeta "Próximamente").
 
-## Preguntas abiertas
+## Ideas pendientes
 
-- ¿Tema "custom" con selector de colores del usuario, o bastan los 4 presets?
-- ¿Segunda miniapp? El hub ya tiene el hueco de "Próximamente".
+- Compartir resultado por link/imagen.
+- Sonidos y sprite de pokébola girando en el centro.
