@@ -15,6 +15,8 @@ body[data-theme="mono"]   { --accent:#e5e5e5; --accent2:#8a8a8a; --gold:#ffffff;
 
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
+html{-webkit-text-size-adjust:100%}
+body{-webkit-tap-highlight-color:transparent}
 body{
   background:radial-gradient(1200px 700px at 15% -10%, color-mix(in srgb,var(--accent) 22%, transparent), transparent 60%),
              radial-gradient(900px 600px at 110% 10%, color-mix(in srgb,var(--accent2) 20%, transparent), transparent 60%),
@@ -23,7 +25,7 @@ body{
 }
 
 /* ---------- topbar ---------- */
-.topbar{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line);
+.topbar{display:flex;align-items:center;gap:12px;padding:calc(14px + env(safe-area-inset-top)) 18px 14px;border-bottom:1px solid var(--line);
   background:color-mix(in srgb,var(--bg2) 80%, transparent);backdrop-filter:blur(8px);position:sticky;top:0;z-index:5}
 .logo{font-family:var(--pixel);font-size:13px;margin:0;display:flex;align-items:center;gap:10px;letter-spacing:.5px}
 .logo-ball{width:18px;height:18px;border-radius:50%;flex:0 0 auto;
@@ -34,8 +36,9 @@ body{
 .topbar .ghost{margin-left:auto}
 
 /* ---------- layout ---------- */
-.layout{display:grid;grid-template-columns:minmax(300px,380px) 1fr;gap:24px;padding:24px;max-width:1180px;margin:0 auto;align-items:start}
-@media(max-width:900px){ .layout{grid-template-columns:1fr;padding:16px;gap:16px} .stage{order:-1} }
+.layout{display:grid;grid-template-columns:minmax(300px,380px) 1fr;gap:24px;
+  padding:24px calc(24px + env(safe-area-inset-right)) calc(32px + env(safe-area-inset-bottom)) calc(24px + env(safe-area-inset-left));
+  max-width:1180px;margin:0 auto;align-items:start}
 
 /* ---------- panel ---------- */
 .panel{display:flex;flex-direction:column;gap:12px}
@@ -82,7 +85,7 @@ button:active{transform:translateY(1px)}
 
 /* ---------- ruleta ---------- */
 .stage{display:flex;flex-direction:column;align-items:center;gap:14px}
-.wheel-wrap{position:relative;width:min(92vw,560px);aspect-ratio:1}
+.wheel-wrap{position:relative;width:min(92vw,560px,72vh);aspect-ratio:1;touch-action:manipulation;user-select:none;-webkit-user-select:none}
 #wheel{width:100%;height:100%;display:block;border-radius:50%;
   box-shadow:0 0 0 10px var(--bg2), 0 0 0 13px var(--accent), 0 24px 60px rgba(0,0,0,.5)}
 .fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
@@ -113,3 +116,36 @@ button:active{transform:translateY(1px)}
 .modal-title{font-family:var(--pixel);font-size:clamp(14px,4.5vw,22px);line-height:1.5;margin:0 0 4px;word-break:break-word}
 .modal-list{text-align:left;margin:14px 0 0;padding-left:22px;font-size:14px;max-height:180px;overflow:auto}
 .modal-list li{padding:3px 0}
+
+/* ===================== responsive (al final: gana sobre las reglas base) ===================== */
+/* --- móvil / tablet: la ruleta primero, el panel debajo --- */
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr;padding:14px;gap:14px}
+  .stage{order:-1;position:sticky;top:56px;z-index:1}
+  .topbar{padding:calc(10px + env(safe-area-inset-top)) 14px 10px}
+  .logo{font-size:11px}
+  .block summary{font-size:9px;padding:6px 0}
+  .history{max-height:160px}
+}
+/* --- móvil estrecho: tamaños táctiles y sin zoom al enfocar inputs en iOS --- */
+@media(max-width:560px){
+  .layout{padding:10px}
+  .wheel-wrap{width:min(96vw,68vh)}
+  button{min-height:44px;padding:10px 14px}
+  .row>button{flex:1 1 auto}
+  textarea,.field input,.field select{font-size:16px}
+  .modal-card{padding:22px 16px;border-radius:18px}
+  .modal .row>button{flex:1 1 140px}
+  .swatch input[type=color]{width:100%;min-width:56px;height:40px}
+}
+/* --- apaisado bajo: que la rueda no coma toda la pantalla --- */
+@media(max-height:520px) and (orientation:landscape){
+  .layout{grid-template-columns:1fr 1fr}
+  .stage{order:0;position:static}
+  .wheel-wrap{width:min(46vw,62vh)}
+}
+@media(prefers-reduced-motion:reduce){
+  .modal-card{animation:none}
+  .round.flash{animation:none}
+  .card,button{transition:none}
+}
