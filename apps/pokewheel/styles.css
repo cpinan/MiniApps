@@ -76,6 +76,8 @@ button:active{transform:translateY(1px)}
 .swatch input[type=color]{width:46px;height:34px;padding:0;border:1px solid var(--line);border-radius:10px;background:none;cursor:pointer}
 .colors button{margin-left:auto;align-self:center}
 
+.hint.build{font-size:10px;opacity:.45;font-family:var(--pixel);letter-spacing:.5px}
+
 .history{list-style:none;margin:10px 0 0;padding:0;max-height:210px;overflow:auto;font-size:13px}
 .history li{display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:8px}
 .history li:nth-child(odd){background:var(--card)}

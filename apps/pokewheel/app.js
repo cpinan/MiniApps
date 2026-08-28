@@ -4,6 +4,7 @@
 const $ = (id) => document.getElementById(id);
 const TAU = Math.PI * 2;
 const STORE = 'pokewheel.v1';
+const BUILD = '2026-08-28.2'; // se ve en consola y en el panel: sirve para saber qué versión corre
 const THEMES = ['pokemon', 'neon', 'pastel', 'mono', 'custom'];
 
 const PALETTES = {
@@ -20,6 +21,7 @@ const state = {
   round: 0,
   rotation: 0,
   spinning: false,
+  guard: 0,
 };
 
 /* ================= parsing ================= */
@@ -339,6 +341,15 @@ function spin() {
 
   state.spinning = true;
   $('spinBtn').disabled = true;
+  // Si el giro se corta a medias (pestaña en segundo plano, excepción en un frame,
+  // rAF congelado), esto devuelve el control en vez de dejar el botón muerto.
+  clearTimeout(state.guard);
+  state.guard = setTimeout(() => {
+    if (!state.spinning) return;
+    state.spinning = false;
+    $('spinBtn').disabled = false;
+    status('El giro se cortó a medias. Puedes volver a girar.');
+  }, dur + 3000);
   let lastIdx = -1;
   const t0 = performance.now();
 
@@ -374,6 +385,7 @@ function finishSpin(expected) {
     state.names.splice(i, 1);
     state.removed.push(name);
   }
+  clearTimeout(state.guard);
   state.spinning = false;
   $('spinBtn').disabled = false;
   drawWheel();
@@ -569,6 +581,23 @@ resizeCanvas();
 renderHistory();
 if (state.names.length) status(`${state.names.length} participantes en la ruleta.`);
 
+console.info(`PokéRuleta build ${BUILD}`);
+$('buildTag').textContent = `build ${BUILD}`;
+
+// El service worker se actualiza solo: si llega una versión nueva y toma el control,
+// la página se recarga una vez sola. Antes había que borrar los datos del sitio a mano
+// para que una corrección llegara al usuario.
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController || reloaded) return; // primera visita: no recargar
+    reloaded = true;
+    location.reload();
+  });
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => { reg.update(); setInterval(() => reg.update(), 60 * 60 * 1000); })
+      .catch(() => {});
+  });
 }

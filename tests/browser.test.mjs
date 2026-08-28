@@ -146,6 +146,45 @@ await sleep(3200);
 check('el segundo giro también corona ganador',
   await evalJs("return !document.getElementById('modal').hidden;"));
 
+/* ---------------- 3b. cinco giros seguidos, con clics de ratón reales ---------------- */
+// Clic real (no .click() de JS): así también se detecta si algo tapa la pokébola.
+const clickReal = async (sel) => {
+  const box = await evalJs(`const el = document.querySelector('${sel}');
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };`);
+  if (!box) return null;
+  await send('Input.dispatchMouseEvent', { type: 'mousePressed', x: box.x, y: box.y, button: 'left', clickCount: 1 });
+  await send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: box.x, y: box.y, button: 'left', clickCount: 1 });
+  return await evalJs(`const el = document.elementFromPoint(${box.x}, ${box.y});
+    return el ? (el.id || el.className || el.tagName) : 'nada';`);
+};
+
+await load();
+await evalJs("document.getElementById('demoBtn').click(); return 1;");
+await setDuration(2);
+const seq = [];
+let stuck = null;
+for (let i = 1; i <= 5; i++) {
+  await clickReal('#spinBtn');
+  await sleep(2900);
+  const r = await evalJs(`return {
+    winner: document.getElementById('modal').hidden ? null : document.getElementById('modalTitle').textContent,
+    disabled: document.getElementById('spinBtn').disabled,
+    left: document.getElementById('countBadge').textContent };`);
+  seq.push(r.winner);
+  if (r.disabled) stuck = stuck || `giro ${i} dejó el botón bloqueado`;
+  if (!r.winner) stuck = stuck || `giro ${i} no coronó ganador`;
+  await clickReal('#closeBtn');
+  await sleep(200);
+}
+check('cinco giros seguidos con ratón real, sin bloquearse', stuck === null, stuck || '');
+check('cada giro corona a alguien', seq.filter(Boolean).length === 5, seq.join(', '));
+check('tras cinco giros quedan 5 participantes',
+  await evalJs("return document.getElementById('countBadge').textContent;") === '5');
+check('el sello de build es visible',
+  /build/.test(await evalJs("return document.getElementById('buildTag').textContent;")));
+
 /* ---------------- 4. ruleta vacía: avisa, no se cuelga ---------------- */
 await evalJs(`document.getElementById('modal').hidden = true;
   document.getElementById('clearBtn').click();
