@@ -11,6 +11,7 @@ import { createServer } from 'http';
 import { readFile } from 'fs/promises';
 import { existsSync } from 'fs';
 import { extname, join, normalize } from 'path';
+import { tmpdir } from 'os';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 const CHROME = process.env.CHROME || [
@@ -44,7 +45,7 @@ const BASE = `http://127.0.0.1:${server.address().port}`;
 const PORT = 9400 + (process.pid % 300);
 const chrome = spawn(CHROME, ['--headless=new', `--remote-debugging-port=${PORT}`,
   '--no-first-run', '--no-default-browser-check', '--disable-gpu', '--mute-audio',
-  `--user-data-dir=${join(ROOT, '.tmp-chrome-profile')}`, '--window-size=1280,900', 'about:blank'],
+  `--user-data-dir=${join(tmpdir(), 'miniapps-chrome-pokewheel')}`, '--window-size=1280,900', 'about:blank'],
   { stdio: 'ignore' });
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));

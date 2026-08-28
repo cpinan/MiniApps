@@ -7,6 +7,7 @@ import { createServer } from 'http';
 import { readFile } from 'fs/promises';
 import { existsSync } from 'fs';
 import { extname, join, normalize } from 'path';
+import { tmpdir } from 'os';
 
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.mjs': 'text/javascript',
   '.png': 'image/png', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json', '.json': 'application/json' };
@@ -42,7 +43,9 @@ export async function launch({ root, port }) {
 
   const chrome = spawn(chromePath, ['--headless=new', `--remote-debugging-port=${port}`,
     '--no-first-run', '--no-default-browser-check', '--disable-gpu', '--mute-audio',
-    `--user-data-dir=${join(root, '.tmp-chrome-profile-' + port)}`, '--window-size=1280,900', 'about:blank'],
+    // El perfil va al tmp del sistema, no al repo: si no, ensucia el árbol de git
+    // y una escritura de Chrome a mitad de un `git add` lo hace fallar.
+    `--user-data-dir=${join(tmpdir(), 'miniapps-chrome-' + port)}`, '--window-size=1280,900', 'about:blank'],
     { stdio: 'ignore' });
 
   let target;
