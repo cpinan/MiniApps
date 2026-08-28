@@ -1,7 +1,7 @@
 /* Repartidor de equipos — reparte una lista en equipos equilibrados. */
 import {
   $, parseNames, dedupe, storage, escapeHtml,
-  currentPalette, applyTheme, initThemePicker, initFx, celebrate, fanfare, blip,
+  currentPalette, textColorFor, applyTheme, initThemePicker, initFx, celebrate, fanfare, blip,
   initShell, THEMES,
 } from '../../assets/shared/core.js';
 import { split, parseApart, norm } from './split.js';
@@ -30,7 +30,7 @@ function render() {
   const capSet = new Set(captainsList().map(norm));
 
   box.innerHTML = state.teams.map((team, i) => `
-    <div class="team" style="--tc:${palette[i % palette.length]};animation-delay:${Math.min(i * 70, 700)}ms">
+    <div class="team" style="--tc:${palette[i % palette.length]};--tct:${textColorFor(palette[i % palette.length])};animation-delay:${Math.min(i * 70, 700)}ms">
       <h2>Equipo ${i + 1} <span class="n">${team.length}</span></h2>
       <ol>${team.map(n => `<li class="${capSet.has(norm(n)) ? 'cap' : ''}">${escapeHtml(n)}</li>`).join('')}</ol>
     </div>`).join('');

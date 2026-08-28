@@ -81,6 +81,16 @@ check('las 12 personas aparecen repartidas', ui.people === 12, JSON.stringify(ui
 check('el resumen cuenta equipos y personas', /12 personas · 4 equipos/.test(ui.summary), ui.summary);
 check('el reparto se celebra con confeti', ui.fx > 0, `píxeles: ${ui.fx}`);
 
+// el color del equipo puede ser casi blanco: el número tiene que seguir leyéndose
+const contrast = await app.evalJs(`const lum = (c) => { const m = c.match(/\\d+/g).map(Number);
+    return 0.2126 * m[0] + 0.7152 * m[1] + 0.0722 * m[2]; };
+  const bad = [...document.querySelectorAll('.team h2 .n')].filter(el => {
+    const cs = getComputedStyle(el);
+    return Math.abs(lum(cs.color) - lum(cs.backgroundColor)) < 60;
+  });
+  return bad.length;`);
+check('el número de cada equipo contrasta con su color', contrast === 0, `ilegibles: ${contrast}`);
+
 const again = await app.evalJs(`const before = [...document.querySelectorAll('.team li')].map(li => li.textContent).join('|');
   document.getElementById('splitBtn').click();
   await new Promise(r => setTimeout(r, 300));
