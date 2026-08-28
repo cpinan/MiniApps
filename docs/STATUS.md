@@ -35,11 +35,23 @@ Una carpeta por app en `apps/`, hub en `index.html`.
 
 ## Verificado
 
-- `npm test` → `tests/pokewheel.test.mjs` 15/15 y `tests/browser.test.mjs` 28/28 en verde.
+- `npm test` → `tests/pokewheel.test.mjs` 15/15 y `tests/browser.test.mjs` 46/46 en verde.
   La suite de navegador prueba que la rueda **gira** de verdad (hash de píxeles del canvas),
   el modal del ganador, el segundo giro tras cerrar la tanda, los colores personalizados y
   que nada se desborda en 390×844 ni apaisado.
 - Sitio en producción probado con Chrome headless: gira, corona ganador y registra el SW.
+
+## Añadido después de publicar
+
+- Celebración del ganador (anillo + confeti; final con oro, estrellas, serpentinas, trofeo,
+  fanfarria larga y nombre letra a letra). `prefers-reduced-motion` la deja estática.
+- Cargar lista reinicia todo: corta el giro en curso por contador de generación, cierra modal,
+  limpia confeti y devuelve la rueda a rotación cero.
+- Pokébola click-only con estados idle / hover / pressed / disabled + anillo de foco.
+- Watchdog: si un giro se corta a medias, el botón se libera solo.
+- Service worker auto-actualizable (`controllerchange` → una recarga) y sello de build visible.
+- Bug corregido: en la celebración final el nombre salía invisible (`background-clip:text` en el
+  `<h2>` con las letras en `<span>` hijos). Ahora es oro con brillo pulsante.
 
 ## Siguiente acción
 

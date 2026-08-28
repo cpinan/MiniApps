@@ -28,7 +28,13 @@ publicar en GitHub Pages y compartir con un link.
 - **Offline**: service worker con cache del app shell.
 - **Móvil**: la ruleta va primero, se ajusta al alto de pantalla (también apaisado), objetivos
   táctiles de 44px, inputs de 16px (iOS no hace zoom) y respeta el safe-area del notch.
-- Un clic siempre gira: si la tanda terminó o la ruleta se vació, arranca una nueva.
+- Un clic siempre gira: si la tanda terminó o la ruleta se vació, arranca una nueva. Cargar una
+  lista reinicia el sorteo entero (corta el giro en curso, cierra el modal, rueda a cero).
+- **Celebración**: anillo + confeti al ganar una ronda; al cerrar la tanda, oro, estrellas,
+  serpentinas en tres oleadas, trofeo, fanfarria larga y el nombre entrando letra a letra.
+  Todo se queda quieto con `prefers-reduced-motion`.
+- La pokébola es solo clickeable (no arrastrable) con estados idle / hover / pressed / disabled.
+- El service worker se actualiza solo: una corrección llega al recargar, sin borrar datos del sitio.
 - Atajos: `Espacio` gira, `Esc` cierra el modal. La rueda entera es clickable.
 
 ## Correr en local
