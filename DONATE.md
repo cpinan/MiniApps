@@ -55,5 +55,6 @@ personal number to everyone who reads this file.
 
 - **You never need to donate to use anything.** Everything is published and fully working, free.
 - **There is no "pro" tier**, no locked features, no watermark, no participant limit.
-- **Nothing asks inside the app.** There is a quiet coffee icon in the header that opens this page,
-  and nothing else: no dialogs, no banners, no reminders, no counting how often you used it.
+- **Nothing asks inside the app.** There is a **coffee button** in the header that opens this page,
+  and nothing else: no dialogs, no banners, no reminders, no counting how often you used it, and
+  nothing locked behind donating.

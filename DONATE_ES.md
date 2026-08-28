@@ -60,5 +60,6 @@ número personal a todo el que lea este archivo.
 
 - **No hace falta donar para usar nada.** Todo está publicado y funciona completo, gratis.
 - **No hay nivel "pro"**, ni funciones bloqueadas, ni marca de agua, ni límite de participantes.
-- **No se pide nada dentro de la app.** Hay un ☕ discreto en la cabecera que trae a esta página, y
-  nada más: sin ventanas, sin banners, sin recordatorios, sin contar cuántas veces la usaste.
+- **No se pide nada dentro de la app.** Hay un botón **☕ Donar** en la cabecera que trae a esta
+  página, y nada más: sin ventanas, sin banners, sin recordatorios, sin contar cuántas veces la
+  usaste, y sin nada bloqueado por no donar.

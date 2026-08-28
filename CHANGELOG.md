@@ -4,6 +4,18 @@ Todos los cambios relevantes de este repo. Formato basado en
 [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y
 [SemVer](https://semver.org/lang/es/).
 
+## [1.2.1] — 2026-08-28
+
+### Cambiado
+
+- **El botón de donar se ve.** Pasa a ser un botón dorado con latido lento, brillo que lo recorre
+  cada pocos segundos y la taza moviéndose; antes era un icono gris que además quedaba flotando a
+  media cabecera, porque el enlace y el botón de tema se repartían el espacio libre con dos
+  `margin-left:auto`. Ahora va pegado a Tema, al borde derecho.
+- **En el hub sube arriba**: cabecera propia fija con la marca y el botón, en vez de un enlace de
+  texto perdido en el pie.
+- Con `prefers-reduced-motion` se ve igual pero sin animación, y hay tests que lo comprueban.
+
 ## [1.2.0] — 2026-08-28
 
 ### Añadido
@@ -110,6 +122,7 @@ en vivo en https://cpinan.github.io/MiniApps/
   pressed y disabled, más anillo de foco para teclado.
 - La línea de ronda tiene aire por encima de la rueda.
 
+[1.2.1]: https://github.com/cpinan/MiniApps/releases/tag/v1.2.1
 [1.2.0]: https://github.com/cpinan/MiniApps/releases/tag/v1.2.0
 [1.1.0]: https://github.com/cpinan/MiniApps/releases/tag/v1.1.0
 [1.0.0]: https://github.com/cpinan/MiniApps/releases/tag/v1.0.0
