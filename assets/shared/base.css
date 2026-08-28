@@ -18,6 +18,10 @@ body[data-theme="pastel"] { --accent:#ff8fab; --accent2:#8ecae6; --gold:#ffd166;
 body[data-theme="mono"]   { --accent:#e5e5e5; --accent2:#8a8a8a; --gold:#ffffff; --bg:#000; --bg2:#111; }
 body[data-theme="custom"] { --bg:#0f1118; --bg2:#181b26; }
 
+/* `hidden` tiene que ganar siempre: cualquier `.clase{display:...}` lo derrota por
+   especificidad y el elemento sigue ocupando sitio aunque el atributo esté puesto. */
+[hidden]{display:none !important}
+
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
 html{-webkit-text-size-adjust:100%}

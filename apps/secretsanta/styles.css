@@ -1,0 +1,57 @@
+.draw{font-family:var(--pixel);font-size:12px;padding:18px 26px;border-radius:16px;align-self:center;
+  letter-spacing:1px;line-height:1.6;user-select:none;touch-action:manipulation;
+  transition:transform .12s cubic-bezier(.2,1.4,.4,1),filter .12s ease}
+.draw:hover:not(:disabled){transform:scale(1.04)}
+.draw:active:not(:disabled){transform:scale(.96);filter:brightness(.92)}
+.draw:focus-visible{outline:3px solid var(--gold);outline-offset:4px}
+.summary{font-family:var(--pixel);font-size:10px;color:var(--muted);margin:0;text-align:center;line-height:1.7}
+.privacy{font-size:12px;color:var(--muted);max-width:56ch;text-align:center;margin:0 auto;line-height:1.6}
+
+.people{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;width:100%}
+.person{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);
+  border-left:6px solid var(--pc,var(--accent));border-radius:14px;padding:12px 14px;
+  animation:cardIn .35s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes cardIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.person .name{font-weight:900;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.person button{margin-left:auto;font-size:12px;padding:7px 11px}
+.person.copied{border-color:var(--gold)}
+
+/* ---------- sobre ---------- */
+.reveal{min-height:70vh;display:grid;place-items:center;padding:28px 18px;gap:20px}
+.reveal[hidden]{display:none}
+.envelope{position:relative;width:min(88vw,420px);aspect-ratio:3/2;border-radius:14px;cursor:pointer;
+  background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 85%, #000) 0%,var(--accent) 100%);
+  box-shadow:0 24px 60px rgba(0,0,0,.5);display:grid;place-content:center;gap:8px;text-align:center;
+  border:3px solid rgba(0,0,0,.35);transition:transform .15s ease}
+.envelope:hover{transform:translateY(-4px) scale(1.02)}
+.envelope:active{transform:scale(.98)}
+.envelope:focus-visible{outline:3px solid var(--gold);outline-offset:5px}
+.flap{position:absolute;inset:0;border-radius:12px;pointer-events:none;
+  background:linear-gradient(to bottom right,transparent 49.6%,rgba(0,0,0,.22) 50%),
+             linear-gradient(to bottom left,transparent 49.6%,rgba(0,0,0,.22) 50%);
+  background-size:100% 52%;background-repeat:no-repeat}
+.seal{width:64px;height:64px;border-radius:50%;background:var(--gold);color:#1a1a1a;font-family:var(--pixel);
+  font-size:20px;display:grid;place-content:center;margin:0 auto;box-shadow:0 6px 16px rgba(0,0,0,.4)}
+.who{font-family:var(--pixel);font-size:11px;color:#fff;margin:6px 0 0;line-height:1.6;text-shadow:0 2px 0 rgba(0,0,0,.35)}
+.tap{font-size:12px;color:rgba(255,255,255,.85);margin:0;animation:pulse 1.8s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.45}}
+
+.result{text-align:center;max-width:460px;animation:pop .35s cubic-bezier(.2,1.4,.4,1)}
+.result[hidden]{display:none}
+.result .modal-title{color:var(--gold);animation:glow 1.8s ease-in-out infinite}
+@keyframes glow{0%,100%{text-shadow:0 0 10px color-mix(in srgb,var(--gold) 55%, transparent)}
+  50%{text-shadow:0 0 26px var(--gold),0 0 44px color-mix(in srgb,var(--gold) 45%, transparent)}}
+.note{color:var(--muted);font-size:14px;margin:10px 0 0}
+.btn-link{display:inline-block;text-decoration:none;border:1px solid var(--line);border-radius:12px;
+  padding:9px 14px;font-weight:800;font-size:13px;color:var(--fg)}
+.btn-link:hover{background:var(--card)}
+
+@media(max-width:560px){
+  .people{grid-template-columns:1fr}
+  .draw{width:100%;font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){
+  .person,.result{animation:none}
+  .tap,.result .modal-title{animation:none}
+  .envelope,.draw{transition:none}
+}

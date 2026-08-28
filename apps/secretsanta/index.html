@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Amigo secreto</title>
+<meta name="description" content="Sortea el amigo secreto y reparte un link por persona. Sin servidor: cada asignación viaja en el fragmento de la URL y nunca sale del navegador.">
+<meta name="theme-color" content="#ee1515">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;700;900&display=swap">
+<link rel="stylesheet" href="../../assets/shared/base.css">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body data-theme="pokemon">
+
+<header class="topbar">
+  <a class="back" href="../../index.html" title="Volver a MiniApps">&#8592;</a>
+  <h1 class="logo"><span class="logo-ball" aria-hidden="true"></span> Amigo secreto</h1>
+  <button id="themeBtn" class="ghost" type="button" title="Cambiar tema">Tema</button>
+</header>
+
+<!-- ============ MODO ORGANIZADOR ============ -->
+<main class="layout" id="organizer">
+
+  <section class="panel" aria-label="Configuración">
+    <details class="block" open>
+      <summary>1 · Participantes <span id="countBadge" class="badge">0</span></summary>
+      <textarea id="namesInput" rows="6" spellcheck="false"
+        placeholder="Un nombre por línea, o separados por coma.&#10;&#10;Ash, Misty, Brock, Gary"></textarea>
+      <div class="row">
+        <button id="demoBtn" class="ghost" type="button">Demo</button>
+        <button id="clearBtn" class="ghost danger" type="button">Vaciar</button>
+      </div>
+      <label class="check"><input type="checkbox" id="dedupe" checked> Quitar nombres repetidos</label>
+    </details>
+
+    <details class="block" open>
+      <summary>2 · Reglas</summary>
+      <label class="field">
+        <span>Quién no puede regalarle a quién (una pareja por línea)</span>
+        <textarea id="apartInput" rows="2" spellcheck="false" placeholder="Ash, Misty&#10;Gary, Brock"></textarea>
+      </label>
+      <p class="hint">Se aplica en los dos sentidos: si Ash no le regala a Misty, Misty tampoco a Ash.</p>
+      <label class="field">
+        <span>Mensaje para el sobre (opcional)</span>
+        <input type="text" id="noteInput" maxlength="80" placeholder="Tope 20 soles · 24 de diciembre">
+      </label>
+      <label class="check"><input type="checkbox" id="sound" checked> Sonido</label>
+    </details>
+
+    <details class="block">
+      <summary>3 · Apariencia</summary>
+      <label class="field">
+        <span>Tema</span>
+        <select id="theme">
+          <option value="pokemon">Pokémon</option>
+          <option value="pokemmo">PokeMMO</option>
+          <option value="neon">Neón</option>
+          <option value="pastel">Pastel</option>
+          <option value="mono">Mono</option>
+          <option value="custom">Personalizado…</option>
+        </select>
+      </label>
+      <div id="customColors" class="colors" hidden>
+        <label class="swatch"><input type="color" id="col1" value="#ee1515"><span>Color A</span></label>
+        <label class="swatch"><input type="color" id="col2" value="#3b4cca"><span>Color B</span></label>
+        <label class="swatch"><input type="color" id="col3" value="#ffcb05"><span>Detalle</span></label>
+        <button id="randomColors" class="ghost" type="button">Al azar</button>
+      </div>
+    </details>
+
+    <p class="hint" id="statusLine">Pega la lista y sortea.</p>
+    <div class="footer-row">
+      <span class="hint build" id="buildTag"></span>
+      <button id="repairBtn" class="ghost tiny" type="button"
+        title="Borra la caché y el service worker, y recarga la última versión">Reparar app</button>
+    </div>
+  </section>
+
+  <section class="stage" aria-label="Resultado">
+    <button id="drawBtn" class="draw primary" type="button">Sortear</button>
+    <p class="summary" id="summaryLine">Nadie sorteado todavía.</p>
+    <p class="privacy" id="privacyNote" hidden>
+      Cada link muestra <b>solo</b> el nombre de esa persona. Ni tú ves quién le tocó a quién:
+      la asignación viaja en el fragmento de la URL, que el navegador nunca envía al servidor.
+    </p>
+    <div id="people" class="people" aria-live="polite"></div>
+  </section>
+</main>
+
+<!-- ============ MODO SOBRE (link personal) ============ -->
+<main class="reveal" id="reveal" hidden>
+  <div class="envelope" id="envelope" role="button" tabindex="0" aria-label="Abrir el sobre">
+    <div class="flap"></div>
+    <div class="seal">?</div>
+    <p class="who" id="whoLine">Sobre de …</p>
+    <p class="tap">Toca para abrir</p>
+  </div>
+
+  <div class="result" id="result" hidden>
+    <p class="modal-kicker" id="revealKicker">Te toca regalarle a</p>
+    <h2 class="modal-title" id="revealName">—</h2>
+    <p class="note" id="revealNote"></p>
+    <div class="row center">
+      <button id="hideBtn" class="ghost" type="button">Ocultar</button>
+      <a class="ghost btn-link" href="./">Hacer mi propio sorteo</a>
+    </div>
+  </div>
+</main>
+
+<canvas id="fx" class="fx" aria-hidden="true"></canvas>
+<script type="module" src="./app.js"></script>
+</body>
+</html>
