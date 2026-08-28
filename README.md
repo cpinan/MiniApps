@@ -3,13 +3,19 @@
 Colección de minijuegos y miniapps **PWA** (HTML + CSS + JS puro, sin build, sin backend) para
 publicar en GitHub Pages y compartir con un link.
 
-👉 **Demo:** https://cpinan.github.io/MiniApps/ *(activa GitHub Pages para que funcione)*
+👉 **En vivo:** https://cpinan.github.io/MiniApps/
 
 ## Apps
 
 | App | Qué hace | Link |
 |---|---|---|
-| 🔴 **PokéRuleta** | Ruleta de nombres estilo Pokémon: pega la lista, configura intentos y sortea ganadores. | [`apps/pokewheel/`](apps/pokewheel/) |
+| 🔴 **PokéRuleta** | Ruleta de nombres: pega la lista, configura intentos y sortea ganadores. | [abrir](https://cpinan.github.io/MiniApps/apps/pokewheel/) · [docs](apps/pokewheel/README.md) |
+| 🎲 **Equipos** | Reparte una lista en equipos parejos, con capitanes fijos y parejas que no deben coincidir. | [abrir](https://cpinan.github.io/MiniApps/apps/teams/) |
+| 🎁 **Amigo secreto** | Sortea y da un link por persona; la asignación viaja en la URL, sin servidor. | [abrir](https://cpinan.github.io/MiniApps/apps/secretsanta/) |
+| 🛡️ **Tabla de tipos** | Efectividad de los 18 tipos: ataque, defensa dual y matriz completa, offline. | [abrir](https://cpinan.github.io/MiniApps/apps/typechart/) |
+| 🔢 **Bolillero** | Bingo: saca números sin repetir y los canta con la voz del navegador. | [abrir](https://cpinan.github.io/MiniApps/apps/bingo/) |
+
+Historial de cambios en [CHANGELOG.md](CHANGELOG.md). Ideas pendientes en [docs/IDEAS.md](docs/IDEAS.md).
 
 ## PokéRuleta
 
@@ -77,11 +83,30 @@ Sin dependencias: `node` y (para la suite de navegador) Chrome instalado.
 3. Settings → Pages → *Deploy from a branch* → `main` / `root`.
 4. El archivo `.nojekyll` ya está en el repo para que Pages no procese nada.
 
+## Cómo está armado
+
+```
+index.html              hub con las tarjetas
+apps/<nombre>/          una carpeta por app: index.html, styles.css, app.js, sw.js, manifest, icons/
+assets/shared/base.css  temas, panel, botones, modal y responsive compartidos
+assets/shared/core.js   parseo de listas, azar sin sesgo, temas, confeti, sonido y arranque PWA
+tests/                  una suite por app + tests/lib/cdp.mjs (arnés de Chrome headless)
+tools/make-icons.py     genera los iconos PNG de cada app con PIL
+```
+
+Cada app trae su propio service worker (network-first) y su sello de build con botón
+**Reparar app**. La lógica sorteable de cada una vive en su módulo puro (`split.js`, `draw.js`,
+`types.js`) para poder testearla sin navegador.
+
 ## Agregar una miniapp nueva
 
-1. `apps/<nombre>/` con su `index.html`, `manifest.webmanifest`, `sw.js` e `icons/`.
+1. `apps/<nombre>/` con su `index.html`, `styles.css`, `app.js`, `sw.js`, `manifest.webmanifest`
+   e `icons/`. Enlaza `../../assets/shared/base.css` y `core.js`.
 2. Rutas siempre **relativas** (`./`) — así funciona en cualquier subcarpeta de Pages.
-3. Agrega una tarjeta en el `index.html` de la raíz y una fila en la tabla de arriba.
+3. La lógica que se pueda probar sin DOM, en su propio módulo.
+4. Una suite en `tests/` con `tests/lib/cdp.mjs`, **incluyendo los chequeos de móvil**
+   (sin scroll horizontal, targets ≥44px, inputs ≥16px, apaisado).
+5. Tarjeta en el `index.html` de la raíz, fila en la tabla de arriba y línea en el CHANGELOG.
 
 ## Donar
 

@@ -12,16 +12,18 @@ Esfuerzo: 🟢 una sesión · 🟡 dos o tres · 🔴 más.
 
 ---
 
+> **Estado**: ya hechas ✅ Repartidor de equipos · Amigo secreto · Tabla de tipos · Bolillero.
+
 ## Recomendadas (reutilizan lo que ya está hecho)
 
-### 1. 🎲 Repartidor de equipos — 🟢
+### 1. 🎲 Repartidor de equipos — ✅ hecho
 Pega la lista, di cuántos equipos, y reparte. Balancea por número, permite fijar capitanes,
 bloquear que dos personas caigan juntas, y re-repartir sin recargar.
 **Reutiliza**: el parser de listas, el sorteo sin sesgo, la persistencia, la celebración.
 **Por qué**: es la petición que sigue a la ruleta en clases, torneos y pichangas. La mitad del
 código ya existe.
 
-### 2. 🎁 Amigo secreto sin servidor — 🟡
+### 2. 🎁 Amigo secreto sin servidor — ✅ hecho
 Pega la lista, marca exclusiones ("estos dos ya se regalan entre ellos"), y genera **un link por
 persona**: el nombre asignado va cifrado en el fragmento de la URL, que nunca viaja al servidor.
 Cada uno abre el suyo y solo ve su resultado.
@@ -29,7 +31,7 @@ Cada uno abre el suyo y solo ve su resultado.
 **Por qué**: la versión con backend es la norma; hacerlo sin backend es el gancho. Estacional
 (diciembre), así que conviene tenerlo listo antes.
 
-### 3. 🔢 Bolillero / bingo — 🟢
+### 3. 🔢 Bolillero / bingo — ✅ hecho
 Saca números sin repetir de 1 a N, con historial visible, número gigante en pantalla y cartones
 imprimibles. Modo "cantado" con voz del navegador (`speechSynthesis`, sin archivos de audio).
 **Reutiliza**: rueda de sorteo, celebración, sonido.
@@ -45,7 +47,7 @@ anuncios.
 
 ## Para la comunidad de PokeMMO / TCG (tu público ya existente)
 
-### 5. 🛡️ Tabla de tipos offline — 🟢
+### 5. 🛡️ Tabla de tipos offline — ✅ hecho
 Eliges tipo(s) atacante/defensor y salen los multiplicadores. Datos propios (una tabla de 18×18
 que se escribe a mano), sin API, sin sprites: cero riesgo de assets ajenos.
 **Por qué**: es lo que un jugador consulta a mitad de combate, y todas las webs que lo dan son
@@ -100,8 +102,8 @@ Base + armonías (complementaria, tríada, análoga), contraste WCAG calculado, 
 
 ---
 
-## Si hay que elegir una
+## Qué sigue
 
-**Repartidor de equipos**, por reutilización pura: el parser, el sorteo justo, los temas y la
-celebración ya están escritos y probados. Es la que menos código nuevo necesita para el mayor uso
-real.
+Las cuatro recomendadas ya están publicadas. De las que quedan, las más rentables por
+reutilización son el **temporizador de turnos** (WebAudio y temas ya están) y el **generador de
+paletas** (el código HSL del tema personalizado ya hace justo eso).
