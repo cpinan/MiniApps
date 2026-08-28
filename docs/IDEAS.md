@@ -13,6 +13,9 @@ Esfuerzo: 🟢 una sesión · 🟡 dos o tres · 🔴 más.
 ---
 
 > **Estado**: ya hechas ✅ Repartidor de equipos · Amigo secreto · Tabla de tipos · Bolillero.
+>
+> Este archivo es la lluvia de ideas. El plan priorizado, con la investigación de mercado detrás,
+> está en [ROADMAP.md](ROADMAP.md).
 
 ## Recomendadas (reutilizan lo que ya está hecho)
 

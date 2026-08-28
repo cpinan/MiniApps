@@ -15,7 +15,8 @@ publicar en GitHub Pages y compartir con un link.
 | 🛡️ **Tabla de tipos** | Efectividad de los 18 tipos: ataque, defensa dual y matriz completa, offline. | [abrir](https://cpinan.github.io/MiniApps/apps/typechart/) |
 | 🔢 **Bolillero** | Bingo: saca números sin repetir y los canta con la voz del navegador. | [abrir](https://cpinan.github.io/MiniApps/apps/bingo/) |
 
-Historial de cambios en [CHANGELOG.md](CHANGELOG.md). Ideas pendientes en [docs/IDEAS.md](docs/IDEAS.md).
+Historial de cambios en [CHANGELOG.md](CHANGELOG.md). Plan de lo que viene, con la investigación
+detrás, en [docs/ROADMAP.md](docs/ROADMAP.md); la lluvia de ideas en [docs/IDEAS.md](docs/IDEAS.md).
 
 ## PokéRuleta
 
