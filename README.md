@@ -13,6 +13,8 @@ publicar en GitHub Pages y compartir con un link.
 
 ## PokéRuleta
 
+Documentación completa en [`apps/pokewheel/README.md`](apps/pokewheel/README.md). Resumen:
+
 - **Entrada flexible**: pega los nombres separados por coma, punto y coma, tab, salto de línea o CSV.
   Si el texto no trae ningún separador, se parte por espacios. Quita comillas y viñetas (`1.`, `-`, `•`).
 - **Reglas configurables**:
