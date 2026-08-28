@@ -41,12 +41,29 @@ body{-webkit-tap-highlight-color:transparent;color:var(--fg);font-family:var(--s
 .back{color:var(--fg);text-decoration:none;font-size:20px;line-height:1;opacity:.7;padding:4px 8px;border-radius:8px}
 .back:hover{opacity:1;background:var(--card)}
 .topbar .ghost{margin-left:auto}
-/* enlace de donación en la cabecera: discreto, nunca un modal ni un banner */
-.donate{display:inline-grid;place-content:center;min-width:40px;height:40px;border-radius:12px;
-  text-decoration:none;font-size:18px;line-height:1;border:1px solid var(--line);margin-left:auto;
-  filter:grayscale(.3);transition:transform .12s ease,background .15s ease,filter .15s ease}
-.donate:hover{background:var(--card);filter:none;transform:translateY(-1px)}
-.donate:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+/* Enlace de donación: arriba y a la vista. Late despacio y le pasa un brillo cada
+   pocos segundos para que se note sin ser un banner ni tapar nada. */
+.donate{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:8px;
+  min-height:42px;padding:0 16px;border-radius:999px;text-decoration:none;font-size:16px;line-height:1;
+  border:2px solid color-mix(in srgb,var(--gold) 70%, #000);
+  background:linear-gradient(135deg,var(--gold),color-mix(in srgb,var(--gold) 65%, #ff8a00));
+  color:#221a05;font-weight:900;margin-left:auto;
+  box-shadow:0 4px 0 color-mix(in srgb,var(--gold) 45%, #000),0 8px 22px color-mix(in srgb,var(--gold) 35%, transparent);
+  animation:donateBeat 2.6s ease-in-out infinite}
+.donate::after{content:'';position:absolute;top:0;bottom:0;width:45%;left:-60%;pointer-events:none;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.75),transparent);
+  animation:donateShine 3.4s ease-in-out infinite}
+.donate:hover{transform:translateY(-2px) scale(1.04);animation-play-state:paused;
+  box-shadow:0 6px 0 color-mix(in srgb,var(--gold) 45%, #000),0 12px 28px color-mix(in srgb,var(--gold) 50%, transparent)}
+.donate:active{transform:translateY(1px) scale(.98)}
+.donate:focus-visible{outline:3px solid var(--fg);outline-offset:3px}
+.donate .cup{display:inline-block;font-size:18px;animation:donateCup 2.6s ease-in-out infinite}
+.donate-text{font-size:13px;letter-spacing:.3px}
+@keyframes donateBeat{0%,100%{transform:scale(1)}8%{transform:scale(1.07)}16%{transform:scale(1)}24%{transform:scale(1.05)}32%{transform:scale(1)}}
+@keyframes donateCup{0%,100%{transform:rotate(0) translateY(0)}10%{transform:rotate(-12deg) translateY(-2px)}20%{transform:rotate(10deg)}30%{transform:rotate(0)}}
+@keyframes donateShine{0%{left:-60%}55%,100%{left:130%}}
+.topbar .ghost{margin-left:0}   /* el hueco lo absorbe el enlace de donación */
+@media(max-width:700px){ .donate-text{display:none} .donate{padding:0 12px;min-width:46px;justify-content:center} }
 
 
 /* ---------- layout ---------- */
@@ -130,13 +147,14 @@ button:disabled{opacity:.5;cursor:not-allowed}
 @media(max-width:560px){
   .layout{padding:10px}
   button{min-height:44px;padding:10px 14px}
-  .donate{height:44px;min-width:44px}
+  .donate{min-height:44px;min-width:44px}
   .row>button{flex:1 1 auto}
   textarea,.field input,.field select{font-size:16px}
   .modal-card{padding:22px 16px;border-radius:18px}
   .swatch input[type=color]{width:100%;min-width:56px;height:40px}
 }
 @media(prefers-reduced-motion:reduce){
+  .donate,.donate::after,.donate .cup{animation:none}
   .modal-card,.rays{animation:none}
   button{transition:none}
 }

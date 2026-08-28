@@ -16,7 +16,30 @@
   body{margin:0;min-height:100vh;color:var(--fg);font-family:Nunito,system-ui,sans-serif;
     background:radial-gradient(1100px 600px at 10% -10%,rgba(238,21,21,.25),transparent 60%),
                radial-gradient(900px 600px at 110% 0%,rgba(59,76,202,.25),transparent 60%),var(--bg)}
-  .wrap{max-width:1000px;margin:0 auto;padding:56px 20px 80px}
+  .wrap{max-width:1000px;margin:0 auto;padding:36px 20px 80px}
+  .hub-top{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px;
+    padding:calc(12px + env(safe-area-inset-top)) 20px 12px;border-bottom:1px solid var(--line);
+    background:color-mix(in srgb,#12131a 82%, transparent);backdrop-filter:blur(8px)}
+  .hub-brand{font-family:'Press Start 2P',monospace;font-size:12px;display:flex;align-items:center;gap:10px}
+  .logo-ball{width:18px;height:18px;border-radius:50%;flex:0 0 auto;
+    background:linear-gradient(var(--accent) 0 47%, #111 47% 53%, #fff 53% 100%);border:2px solid #111;
+    box-shadow:0 0 0 1px rgba(255,255,255,.25)}
+  /* mismo botón de donar que en las apps: arriba, dorado y latiendo */
+  .donate{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:8px;margin-left:auto;
+    min-height:42px;padding:0 16px;border-radius:999px;text-decoration:none;font-size:16px;line-height:1;
+    border:2px solid #c79a06;background:linear-gradient(135deg,#ffcb05,#ff9f1c);color:#221a05;font-weight:900;
+    box-shadow:0 4px 0 #8a6c05,0 8px 22px rgba(255,203,5,.35);animation:donateBeat 2.6s ease-in-out infinite}
+  .donate::after{content:'';position:absolute;top:0;bottom:0;width:45%;left:-60%;pointer-events:none;
+    background:linear-gradient(100deg,transparent,rgba(255,255,255,.75),transparent);
+    animation:donateShine 3.4s ease-in-out infinite}
+  .donate:hover{transform:translateY(-2px) scale(1.04);animation-play-state:paused}
+  .donate .cup{display:inline-block;font-size:18px;animation:donateCup 2.6s ease-in-out infinite}
+  .donate-text{font-size:13px;letter-spacing:.3px}
+  @keyframes donateBeat{0%,100%{transform:scale(1)}8%{transform:scale(1.07)}16%{transform:scale(1)}24%{transform:scale(1.05)}32%{transform:scale(1)}}
+  @keyframes donateCup{0%,100%{transform:rotate(0) translateY(0)}10%{transform:rotate(-12deg) translateY(-2px)}20%{transform:rotate(10deg)}30%{transform:rotate(0)}}
+  @keyframes donateShine{0%{left:-60%}55%,100%{left:130%}}
+  @media(max-width:700px){ .hub-top{padding-left:14px;padding-right:14px} .hub-brand{font-size:10px} }
+  @media(prefers-reduced-motion:reduce){ .donate,.donate::after,.donate .cup{animation:none} }
   h1{font-family:'Press Start 2P',monospace;font-size:clamp(16px,4.5vw,26px);line-height:1.6;margin:0 0 12px}
   .sub{color:var(--muted);font-size:16px;margin:0 0 40px;max-width:56ch}
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px}
@@ -34,6 +57,13 @@
 </style>
 </head>
 <body>
+<header class="hub-top">
+  <span class="hub-brand"><span class="logo-ball" aria-hidden="true"></span> MiniApps</span>
+  <a class="donate" href="https://github.com/cpinan/MiniApps/blob/main/DONATE_ES.md"
+     target="_blank" rel="noopener" title="Apoyar MiniApps · gratis y sin anuncios"
+     aria-label="Donar"><span class="cup" aria-hidden="true">☕</span><span class="donate-text">Donar</span></a>
+</header>
+
 <div class="wrap">
   <h1>MiniApps</h1>
   <p class="sub">Minijuegos y utilidades que corren en el navegador. Cada una es una PWA independiente:
@@ -79,7 +109,6 @@
   <footer>
     Hecho por <a href="https://github.com/cpinan">@cpinan</a> · código abierto, sin backend, sin tracking.
     · <a href="https://github.com/cpinan/MiniApps">Repo</a>
-    · <a href="https://github.com/cpinan/MiniApps/blob/main/DONATE_ES.md">☕ Donar</a>
   </footer>
 </div>
 </body>
