@@ -4,7 +4,7 @@
 const $ = (id) => document.getElementById(id);
 const TAU = Math.PI * 2;
 const STORE = 'pokewheel.v1';
-const THEMES = ['pokemon', 'neon', 'pastel', 'mono'];
+const THEMES = ['pokemon', 'neon', 'pastel', 'mono', 'custom'];
 
 const PALETTES = {
   pokemon: ['#EE1515', '#F0F0F0', '#3B4CCA', '#FFCB05', '#2A75BB', '#7AC74C', '#B7B7CE', '#F58020'],
@@ -88,9 +88,80 @@ function resizeCanvas() {
   drawWheel();
 }
 
+function hexToHsl(hex) {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.slice(0, 2), 16) / 255, g = parseInt(h.slice(2, 4), 16) / 255, b = parseInt(h.slice(4, 6), 16) / 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+  const l = (max + min) / 2;
+  let hue = 0, sat = 0;
+  if (d) {
+    sat = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    if (max === r) hue = ((g - b) / d + (g < b ? 6 : 0));
+    else if (max === g) hue = (b - r) / d + 2;
+    else hue = (r - g) / d + 4;
+    hue *= 60;
+  }
+  return { h: hue, s: sat, l };
+}
+
+function hslToHex(h, s, l) {
+  h = ((h % 360) + 360) % 360;
+  const c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = l - c / 2;
+  const seg = [[c, x, 0], [x, c, 0], [0, c, x], [0, x, c], [x, 0, c], [c, 0, x]][Math.floor(h / 60) % 6];
+  return '#' + seg.map(v => Math.round((v + m) * 255).toString(16).padStart(2, '0')).join('');
+}
+
+function mixHsl(a, b, t) {
+  let dh = ((b.h - a.h + 540) % 360) - 180; // arco de tono más corto
+  return { h: a.h + dh * t, s: a.s + (b.s - a.s) * t, l: a.l + (b.l - a.l) * t };
+}
+
+// Genera 8 gajos a partir de los 3 colores del usuario, alternando claro/oscuro
+// para que dos gajos vecinos nunca se confundan.
+function customPalette(hexes) {
+  const anchors = hexes.map(hexToHsl);
+  const out = [];
+  for (let i = 0; i < 8; i++) {
+    const t = (i / 7) * (anchors.length - 1);
+    const k = Math.min(anchors.length - 2, Math.floor(t));
+    const c = mixHsl(anchors[k], anchors[k + 1], t - k);
+    const l = i % 2 ? Math.min(0.88, c.l + 0.22) : Math.max(0.16, c.l - 0.08);
+    out.push(hslToHex(c.h, Math.min(1, Math.max(0.28, c.s)), l));
+  }
+  return out;
+}
+
+function customHexes() {
+  return ['col1', 'col2', 'col3'].map(id => $(id).value);
+}
+
 function paletteColors() {
   const theme = document.body.dataset.theme;
+  if (theme === 'custom') {
+    const [a, b, c] = customHexes();
+    return customPalette([a, c, b]);
+  }
   return PALETTES[theme] || PALETTES.pokemon;
+}
+
+function applyTheme(name) {
+  if (!THEMES.includes(name)) name = 'pokemon';
+  document.body.dataset.theme = name;
+  $('theme').value = name;
+  const custom = name === 'custom';
+  $('customColors').hidden = !custom;
+  const st = document.body.style;
+  if (custom) {
+    const [a, b, c] = customHexes();
+    st.setProperty('--accent', a);
+    st.setProperty('--accent2', b);
+    st.setProperty('--gold', c);
+  } else {
+    st.removeProperty('--accent');
+    st.removeProperty('--accent2');
+    st.removeProperty('--gold');
+  }
+  drawWheel();
 }
 
 function textColorFor(hex) {
@@ -406,7 +477,7 @@ function save() {
   const cfg = {
     raw: $('namesInput').value,
     names: state.names, removed: state.removed, history: state.history, round: state.round,
-    theme: document.body.dataset.theme,
+    theme: document.body.dataset.theme, colors: customHexes(),
     rounds: $('rounds').value, removePicked: $('removePicked').checked,
     winnerMode: $('winnerMode').value, duration: $('duration').value,
     sound: $('sound').checked, dedupe: $('dedupe').checked, shuffle: $('shuffle').checked,
@@ -423,7 +494,8 @@ function restore() {
   state.removed = Array.isArray(cfg.removed) ? cfg.removed : [];
   state.history = Array.isArray(cfg.history) ? cfg.history : [];
   state.round = cfg.round || 0;
-  if (THEMES.includes(cfg.theme)) document.body.dataset.theme = cfg.theme;
+  if (Array.isArray(cfg.colors)) ['col1', 'col2', 'col3'].forEach((id, i) => { if (cfg.colors[i]) $(id).value = cfg.colors[i]; });
+  if (THEMES.includes(cfg.theme)) applyTheme(cfg.theme);
   if (cfg.rounds) $('rounds').value = cfg.rounds;
   if (cfg.duration) $('duration').value = cfg.duration;
   if (cfg.winnerMode) $('winnerMode').value = cfg.winnerMode;
@@ -470,14 +542,28 @@ $('duration').addEventListener('input', () => { $('durLabel').textContent = $('d
   $(id).addEventListener('change', () => { updateRound(); save(); }));
 $('themeBtn').addEventListener('click', () => {
   const i = THEMES.indexOf(document.body.dataset.theme);
-  document.body.dataset.theme = THEMES[(i + 1) % THEMES.length];
-  drawWheel(); save();
+  applyTheme(THEMES[(i + 1) % THEMES.length]);
+  save();
   status(`Tema: ${document.body.dataset.theme}`);
+});
+$('theme').addEventListener('change', () => { applyTheme($('theme').value); save(); });
+['col1', 'col2', 'col3'].forEach(id => $(id).addEventListener('input', () => {
+  applyTheme('custom'); save();
+}));
+$('randomColors').addEventListener('click', () => {
+  const base = randomInt(360);
+  const spread = [0, 150 + randomInt(60), 40 + randomInt(40)];
+  ['col1', 'col2', 'col3'].forEach((id, i) => {
+    $(id).value = hslToHex(base + spread[i], 0.6 + Math.random() * 0.3, 0.45 + Math.random() * 0.15);
+  });
+  applyTheme('custom'); save();
+  status('Colores nuevos generados.');
 });
 window.addEventListener('resize', resizeCanvas);
 
 /* ================= arranque ================= */
 restore();
+applyTheme(document.body.dataset.theme);
 $('durLabel').textContent = $('duration').value + ' s';
 resizeCanvas();
 renderHistory();

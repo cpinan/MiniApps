@@ -63,7 +63,27 @@
     </details>
 
     <details class="block">
-      <summary>3 · Historial <span id="histBadge" class="badge">0</span></summary>
+      <summary>3 · Apariencia</summary>
+      <label class="field">
+        <span>Tema</span>
+        <select id="theme">
+          <option value="pokemon">Pokémon</option>
+          <option value="neon">Neón</option>
+          <option value="pastel">Pastel</option>
+          <option value="mono">Mono</option>
+          <option value="custom">Personalizado…</option>
+        </select>
+      </label>
+      <div id="customColors" class="colors" hidden>
+        <label class="swatch"><input type="color" id="col1" value="#ee1515"><span>Color A</span></label>
+        <label class="swatch"><input type="color" id="col2" value="#3b4cca"><span>Color B</span></label>
+        <label class="swatch"><input type="color" id="col3" value="#ffcb05"><span>Detalle</span></label>
+        <button id="randomColors" class="ghost" type="button">Al azar</button>
+      </div>
+    </details>
+
+    <details class="block">
+      <summary>4 · Historial <span id="histBadge" class="badge">0</span></summary>
       <ol id="history" class="history"><li class="empty">Sin giros todavía.</li></ol>
       <div class="row">
         <button id="resetBtn" class="ghost" type="button">Reiniciar sorteo</button>

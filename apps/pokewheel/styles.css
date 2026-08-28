@@ -10,6 +10,7 @@ body[data-theme="pokemon"]{ --accent:#ee1515; --accent2:#3b4cca; --gold:#ffcb05;
 body[data-theme="neon"]   { --accent:#ff2fd0; --accent2:#00e5ff; --gold:#c6ff00; --bg:#0a0713; --bg2:#150e24; }
 body[data-theme="pastel"] { --accent:#ff8fab; --accent2:#8ecae6; --gold:#ffd166; --bg:#fdf7f9; --bg2:#ffffff;
   --fg:#2b2b33; --muted:#6c6f80; --line:rgba(0,0,0,.12); --card:rgba(0,0,0,.035); }
+body[data-theme="custom"]{ --bg:#0f1118; --bg2:#181b26; }
 body[data-theme="mono"]   { --accent:#e5e5e5; --accent2:#8a8a8a; --gold:#ffffff; --bg:#000; --bg2:#111; }
 
 *{box-sizing:border-box}
@@ -65,6 +66,12 @@ button:active{transform:translateY(1px)}
 .check{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;color:var(--fg);cursor:pointer}
 .check input{accent-color:var(--accent);width:16px;height:16px}
 .hint{font-size:12px;color:var(--muted);margin:2px 4px 0;min-height:1.2em}
+
+.colors{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-top:12px}
+.colors[hidden]{display:none}  /* si no, display:flex gana al [hidden] del navegador */
+.swatch{display:flex;flex-direction:column;gap:5px;align-items:center;font-size:11px;color:var(--muted);cursor:pointer}
+.swatch input[type=color]{width:46px;height:34px;padding:0;border:1px solid var(--line);border-radius:10px;background:none;cursor:pointer}
+.colors button{margin-left:auto;align-self:center}
 
 .history{list-style:none;margin:10px 0 0;padding:0;max-height:210px;overflow:auto;font-size:13px}
 .history li{display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:8px}
