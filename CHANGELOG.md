@@ -4,6 +4,14 @@ Todos los cambios relevantes de este repo. Formato basado en
 [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y
 [SemVer](https://semver.org/lang/es/).
 
+## [1.2.0] — 2026-08-28
+
+### Añadido
+
+- **Enlace de donación en la cabecera de las cinco apps**: un ☕ discreto que abre `DONATE_ES.md`
+  en una pestaña nueva (`rel="noopener"`), con etiqueta accesible y área táctil de 44px en móvil.
+  Nada de ventanas, banners ni recordatorios; las páginas de donación lo dejan por escrito.
+
 ## [1.1.0] — 2026-08-28
 
 Cuatro miniapps nuevas y un núcleo compartido.
@@ -102,5 +110,6 @@ en vivo en https://cpinan.github.io/MiniApps/
   pressed y disabled, más anillo de foco para teclado.
 - La línea de ronda tiene aire por encima de la rueda.
 
+[1.2.0]: https://github.com/cpinan/MiniApps/releases/tag/v1.2.0
 [1.1.0]: https://github.com/cpinan/MiniApps/releases/tag/v1.1.0
 [1.0.0]: https://github.com/cpinan/MiniApps/releases/tag/v1.0.0

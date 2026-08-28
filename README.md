@@ -117,7 +117,8 @@ Todo esto es gratis, MIT, sin anuncios ni rastreo, y así se queda. Si te sirvi�
 [![PayPal](https://img.shields.io/badge/PayPal-donar-00457c?logo=paypal&logoColor=white)](https://paypal.me/carlospinan)
 
 Desde Perú, sin comisión para nadie: **Yape y Plin por QR** en [DONATE_ES.md](DONATE_ES.md)
-([English](DONATE.md)).
+([English](DONATE.md)). Cada app lleva un ☕ en la cabecera que abre esa misma página — y nada
+más: ni ventanas, ni banners, ni recordatorios.
 
 Lo que más ayuda no cuesta nada: una estrella al repo, compartir el link, o mandar una miniapp.
 

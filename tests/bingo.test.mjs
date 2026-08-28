@@ -35,6 +35,19 @@ if (!app) { console.log('SKIP  No se encontró Chrome.'); process.exit(done() ? 
 
 await app.goto('/apps/bingo/');
 check('la app carga sin errores de consola', app.errors.length === 0, app.errors.join(' | '));
+// el enlace de donación vive en la cabecera de todas las apps
+const donate = await app.evalJs(`const a = document.querySelector('.donate');
+  if (!a) return null;
+  const r = a.getBoundingClientRect();
+  return { href: a.getAttribute('href'), target: a.getAttribute('target'), rel: a.getAttribute('rel'),
+    aria: a.getAttribute('aria-label'), h: Math.round(r.height), w: Math.round(r.width),
+    inHeader: !!a.closest('.topbar') };`);
+check('la cabecera lleva enlace de donación',
+  !!donate && /DONATE_ES\.md/.test(donate.href) && donate.inHeader, JSON.stringify(donate));
+check('el enlace abre fuera y sin filtrar la sesión',
+  donate?.target === '_blank' && /noopener/.test(donate?.rel || ''), JSON.stringify(donate));
+check('el enlace de donación tiene etiqueta accesible', !!donate?.aria, JSON.stringify(donate));
+
 check('el tablero arranca con 90 casillas',
   await app.evalJs("return document.querySelectorAll('#board i').length;") === 90);
 
@@ -105,6 +118,11 @@ const mob = await app.evalJs(`const doc = document.documentElement;
     ball: Math.round(b.width), fits: Math.round(board.width) <= window.innerWidth,
     cols: getComputedStyle(document.getElementById('board')).gridTemplateColumns.split(' ').length };`);
 check('móvil: sin scroll horizontal', mob.overflow <= 0, `desborde ${mob.overflow}px`);
+const donateTap = await app.evalJs(`const r = document.querySelector('.donate').getBoundingClientRect();
+  return { h: Math.round(r.height), w: Math.round(r.width) };`);
+check('móvil: el enlace de donación es tocable',
+  donateTap.h >= 44 && donateTap.w >= 44, JSON.stringify(donateTap));
+
 check('móvil: la bola es grande y tocable', mob.ball >= 44, `${mob.ball}px`);
 check('móvil: el tablero cabe a lo ancho', mob.fits === true, JSON.stringify(mob));
 check('móvil: el tablero pasa a 8 columnas', mob.cols === 8, `columnas: ${mob.cols}`);

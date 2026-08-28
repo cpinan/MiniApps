@@ -112,6 +112,16 @@ const setDuration = (sec) => evalJs(
 /* ---------------- 1. carga limpia ---------------- */
 await load();
 check('la página carga sin errores de consola', errors.length === 0, errors.join(' | '));
+const donate = await evalJs(`const a = document.querySelector('.donate');
+  if (!a) return null;
+  const r = a.getBoundingClientRect();
+  return { href: a.getAttribute('href'), target: a.getAttribute('target'), rel: a.getAttribute('rel'),
+    aria: a.getAttribute('aria-label'), inHeader: !!a.closest('.topbar') };`);
+check('la cabecera lleva enlace de donación',
+  !!donate && /DONATE_ES\.md/.test(donate.href) && donate.inHeader, JSON.stringify(donate));
+check('el enlace abre fuera y sin filtrar la sesión',
+  donate?.target === '_blank' && /noopener/.test(donate?.rel || ''), JSON.stringify(donate));
+
 check('la lista demo carga 10 nombres',
   await evalJs("document.getElementById('demoBtn').click(); return document.getElementById('countBadge').textContent;") === '10');
 
@@ -402,6 +412,11 @@ const tapped = await evalJs(`const r = document.getElementById('spinBtn').getBou
   const el = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
   return el && (el.id === 'spinBtn' || el.closest('#spinBtn') ? 'spinBtn' : el.id || el.className);`);
 check('móvil: el centro de la ruleta recibe el toque', tapped === 'spinBtn', `recibe: ${tapped}`);
+
+const donateTap = await evalJs(`const r = document.querySelector('.donate').getBoundingClientRect();
+  return { h: Math.round(r.height), w: Math.round(r.width) };`);
+check('móvil: el enlace de donación es tocable',
+  donateTap.h >= 44 && donateTap.w >= 44, JSON.stringify(donateTap));
 
 /* ---------------- 7. apaisado ---------------- */
 await send('Emulation.setDeviceMetricsOverride',

@@ -38,6 +38,13 @@ body{
 .back{color:var(--fg);text-decoration:none;font-size:20px;line-height:1;opacity:.7;padding:4px 8px;border-radius:8px}
 .back:hover{opacity:1;background:var(--card)}
 .topbar .ghost{margin-left:auto}
+/* enlace de donación en la cabecera: discreto, nunca un modal ni un banner */
+.donate{display:inline-grid;place-content:center;min-width:40px;height:40px;border-radius:12px;
+  text-decoration:none;font-size:18px;line-height:1;border:1px solid var(--line);margin-left:auto;
+  filter:grayscale(.3);transition:transform .12s ease,background .15s ease,filter .15s ease}
+.donate:hover{background:var(--card);filter:none;transform:translateY(-1px)}
+.donate:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
 
 /* ---------- layout ---------- */
 .layout{display:grid;grid-template-columns:minmax(300px,380px) 1fr;gap:24px;
@@ -172,6 +179,7 @@ button.tiny:hover{opacity:1}
   .layout{padding:10px}
   .wheel-wrap{width:min(96vw,68vh)}
   button{min-height:44px;padding:10px 14px}
+  .donate{height:44px;min-width:44px}
   .row>button{flex:1 1 auto}
   textarea,.field input,.field select{font-size:16px}
   .modal-card{padding:22px 16px;border-radius:18px}
