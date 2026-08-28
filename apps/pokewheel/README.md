@@ -131,6 +131,14 @@ Usa *Reparar app* o cambia de puerto.
 
 ---
 
+## Donar
+
+Gratis, MIT, sin anuncios ni rastreo. Si te sirvió:
+[GitHub Sponsors](https://github.com/sponsors/cpinan) ·
+[Ko-fi](https://ko-fi.com/carlospinan) ·
+[PayPal](https://paypal.me/carlospinan) ·
+desde Perú por QR de Yape/Plin en [DONATE_ES.md](../../DONATE_ES.md).
+
 ## Licencia
 
 MIT. Pokémon es marca de Nintendo / Creatures / GAME FREAK, y PokeMMO es un proyecto

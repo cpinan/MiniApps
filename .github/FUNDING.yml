@@ -1,0 +1,14 @@
+# Botón "Sponsor" de la página del repo.
+#
+# Solo van plataformas con cuenta viva: una entrada sin cuenta detrás renderiza un botón que da
+# 404, y eso es peor que no tener botón. Este archivo por sí solo NO crea el botón: hay que
+# activar Sponsorships en Settings -> General -> Features.
+#
+# `github` va primero porque GitHub no se queda comisión y resuelve dentro del propio diálogo de
+# GitHub, sin mandar a quien dona a otro sitio.
+
+github: cpinan
+
+ko_fi: carlospinan
+
+custom: ["https://paypal.me/carlospinan", "https://github.com/cpinan/MiniApps/blob/main/DONATE_ES.md"]

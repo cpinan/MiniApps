@@ -83,6 +83,19 @@ Sin dependencias: `node` y (para la suite de navegador) Chrome instalado.
 2. Rutas siempre **relativas** (`./`) — así funciona en cualquier subcarpeta de Pages.
 3. Agrega una tarjeta en el `index.html` de la raíz y una fila en la tabla de arriba.
 
+## Donar
+
+Todo esto es gratis, MIT, sin anuncios ni rastreo, y así se queda. Si te sirvió:
+
+[![Sponsor](https://img.shields.io/badge/GitHub-Sponsors-ea4aaa?logo=githubsponsors)](https://github.com/sponsors/cpinan)
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-invitar%20un%20café-ff5e5b?logo=kofi&logoColor=white)](https://ko-fi.com/carlospinan)
+[![PayPal](https://img.shields.io/badge/PayPal-donar-00457c?logo=paypal&logoColor=white)](https://paypal.me/carlospinan)
+
+Desde Perú, sin comisión para nadie: **Yape y Plin por QR** en [DONATE_ES.md](DONATE_ES.md)
+([English](DONATE.md)).
+
+Lo que más ayuda no cuesta nada: una estrella al repo, compartir el link, o mandar una miniapp.
+
 ## Licencia
 
 MIT. Pokémon es marca de Nintendo / Creatures / GAME FREAK, y PokeMMO es un proyecto
