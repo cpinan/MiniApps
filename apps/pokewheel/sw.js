@@ -1,5 +1,5 @@
 /* PokéRuleta service worker — cache-first del app shell. */
-const CACHE = 'pokewheel-v1';
+const CACHE = 'pokewheel-v2';
 const ASSETS = [
   './', './index.html', './styles.css', './app.js',
   './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/favicon.svg',
@@ -20,11 +20,18 @@ self.addEventListener('fetch', (e) => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return; // fuentes externas: red directa
+
+  // Red primero: si el servidor responde, esa copia manda y se refresca la caché.
+  // Con cache-first una versión vieja del app shell se quedaba pegada para siempre
+  // y las correcciones no llegaban nunca al usuario. La caché es solo el respaldo
+  // para cuando no hay conexión.
   e.respondWith(
-    caches.match(req).then(hit => hit || fetch(req).then(res => {
-      const copy = res.clone();
-      caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {});
-      return res;
-    }).catch(() => caches.match('./index.html')))
+    fetch(req)
+      .then((res) => {
+        const copy = res.clone();
+        caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {});
+        return res;
+      })
+      .catch(() => caches.match(req).then(hit => hit || caches.match('./index.html')))
   );
 });
