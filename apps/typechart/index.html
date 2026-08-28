@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Tabla de tipos</title>
+<meta name="description" content="Tabla de efectividad de tipos, offline y sin anuncios: qué le hace daño a qué, defensa con dos tipos y la matriz completa.">
+<meta name="theme-color" content="#2FBFC9">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;700;900&display=swap">
+<link rel="stylesheet" href="../../assets/shared/base.css">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body data-theme="pokemmo">
+
+<header class="topbar">
+  <a class="back" href="../../index.html" title="Volver a MiniApps">&#8592;</a>
+  <h1 class="logo"><span class="logo-ball" aria-hidden="true"></span> Tabla de tipos</h1>
+  <button id="themeBtn" class="ghost" type="button" title="Cambiar tema">Tema</button>
+</header>
+
+<main class="chart">
+
+  <div class="tabs" role="tablist">
+    <button id="tabAtk" class="tab is-on" type="button" role="tab" aria-selected="true">Atacar</button>
+    <button id="tabDef" class="tab" type="button" role="tab" aria-selected="false">Defender</button>
+    <button id="tabAll" class="tab" type="button" role="tab" aria-selected="false">Matriz</button>
+  </div>
+
+  <p class="lead" id="lead">Elige el tipo del ataque.</p>
+
+  <div id="picker" class="picker" aria-label="Tipos"></div>
+
+  <div class="row center" id="dualRow" hidden>
+    <button id="clearTypes" class="ghost" type="button">Quitar selección</button>
+    <span class="hint" id="dualHint">Puedes marcar hasta dos tipos.</span>
+  </div>
+
+  <section id="result" class="result" aria-live="polite"></section>
+
+  <section id="matrix" class="matrix-wrap" hidden></section>
+
+  <p class="hint" id="statusLine"></p>
+  <div class="footer-row">
+    <span class="hint build" id="buildTag"></span>
+    <button id="repairBtn" class="ghost tiny" type="button"
+      title="Borra la caché y el service worker, y recarga la última versión">Reparar app</button>
+  </div>
+</main>
+
+<script type="module" src="./app.js"></script>
+</body>
+</html>

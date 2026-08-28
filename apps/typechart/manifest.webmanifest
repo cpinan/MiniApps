@@ -1,0 +1,17 @@
+{
+  "name": "Tabla de tipos",
+  "short_name": "Tipos",
+  "description": "Tabla de efectividad de tipos offline: ataque, defensa con dos tipos y la matriz completa.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0B101C",
+  "theme_color": "#2FBFC9",
+  "lang": "es",
+  "categories": ["utilities", "reference"],
+  "icons": [
+    { "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "./icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
