@@ -35,7 +35,7 @@ Una carpeta por app en `apps/`, hub en `index.html`.
 
 ## Verificado
 
-- `npm test` → `tests/pokewheel.test.mjs` 15/15 y `tests/browser.test.mjs` 46/46 en verde.
+- `npm test` → `tests/pokewheel.test.mjs` 15/15 y `tests/browser.test.mjs` 49/49 en verde.
   La suite de navegador prueba que la rueda **gira** de verdad (hash de píxeles del canvas),
   el modal del ganador, el segundo giro tras cerrar la tanda, los colores personalizados y
   que nada se desborda en 390×844 ni apaisado.
