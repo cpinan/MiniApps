@@ -223,6 +223,54 @@ check('el nombre del ganador se ve en la celebración final',
 check('último giro: el cartel anuncia el final', /terminado/i.test(grand.kicker), grand.kicker);
 check('la celebración final también pinta', grand.painted > 0, `píxeles: ${grand.painted}`);
 
+/* ---------------- 3d. cargar lista reinicia la ruleta ---------------- */
+await load();
+await evalJs("document.getElementById('demoBtn').click(); return 1;");
+await setDuration(6);
+await evalJs("document.getElementById('spinBtn').click(); return 1;");
+await sleep(900);
+const midSpin = await evalJs("return document.getElementById('spinBtn').disabled;");
+await evalJs(`document.getElementById('namesInput').value = 'Uno, Dos, Tres';
+  document.getElementById('loadBtn').click(); return 1;`);
+await sleep(700);
+const afterLoad = await evalJs(`return {
+  disabled: document.getElementById('spinBtn').disabled,
+  modal: document.getElementById('modal').hidden,
+  round: document.getElementById('roundLine').textContent,
+  count: document.getElementById('countBadge').textContent,
+  hist: document.getElementById('histBadge').textContent };`);
+check('el giro estaba en curso al cargar la lista', midSpin === true);
+check('cargar lista corta el giro y libera el botón', afterLoad.disabled === false, JSON.stringify(afterLoad));
+check('cargar lista deja la ronda en 0', /Ronda 0/.test(afterLoad.round), afterLoad.round);
+check('cargar lista repuebla la ruleta', afterLoad.count === '3' && afterLoad.hist === '0', JSON.stringify(afterLoad));
+check('cargar lista cierra el modal', afterLoad.modal === true);
+
+/* ---------------- 3e. el botón: idle / hover / pressed ---------------- */
+const btnBox = await evalJs(`const r = document.getElementById('spinBtn').getBoundingClientRect();
+  return { x: r.left + r.width / 2, y: r.top + r.height / 2 };`);
+const transformNow = () => evalJs("return getComputedStyle(document.getElementById('spinBtn')).transform;");
+await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 5, y: 5 });
+await sleep(200);
+const idle = await transformNow();
+await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: btnBox.x, y: btnBox.y });
+await sleep(250);
+const hover = await transformNow();
+const drag = await evalJs(`const b = document.getElementById('spinBtn'), cs = getComputedStyle(b);
+  return { draggable: b.getAttribute('draggable'), select: cs.userSelect || cs.webkitUserSelect,
+           cursor: cs.cursor, touch: cs.touchAction };`);
+check('el botón no se puede arrastrar ni seleccionar',
+  drag.draggable === 'false' && drag.select === 'none', JSON.stringify(drag));
+check('el botón se ve clickeable', drag.cursor === 'pointer', drag.cursor);
+await send('Input.dispatchMouseEvent', { type: 'mousePressed', x: btnBox.x, y: btnBox.y, button: 'left', clickCount: 1 });
+await sleep(250);
+const pressed = await transformNow();
+await send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: btnBox.x, y: btnBox.y, button: 'left', clickCount: 1 });
+await sleep(100);
+check('el botón tiene estado hover distinto del idle', hover !== idle, `idle ${idle} / hover ${hover}`);
+check('el botón tiene estado pressed distinto del hover', pressed !== hover, `hover ${hover} / pressed ${pressed}`);
+check('la línea de ronda tiene aire arriba',
+  parseFloat(await evalJs("return getComputedStyle(document.getElementById('roundLine')).marginTop;")) >= 12);
+
 /* ---------------- 4. ruleta vacía: avisa, no se cuelga ---------------- */
 await evalJs(`document.getElementById('modal').hidden = true;
   document.getElementById('clearBtn').click();

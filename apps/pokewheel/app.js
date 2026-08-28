@@ -22,6 +22,7 @@ const state = {
   rotation: 0,
   spinning: false,
   guard: 0,
+  spinId: 0,   // corta el giro en curso si se recarga la lista a mitad
 };
 
 /* ================= parsing ================= */
@@ -412,6 +413,7 @@ function spin() {
   const to = from + turns * TAU + ((target - from) % TAU + TAU) % TAU;
   const dur = (parseInt($('duration').value, 10) || 5) * 1000;
 
+  const myId = ++state.spinId;
   state.spinning = true;
   $('spinBtn').disabled = true;
   // Si el giro se corta a medias (pestaña en segundo plano, excepción en un frame,
@@ -427,6 +429,7 @@ function spin() {
   const t0 = performance.now();
 
   const frame = (now) => {
+    if (myId !== state.spinId) return; // la lista cambió: este giro ya no vale
     const t = Math.min(1, (now - t0) / dur);
     state.rotation = from + (to - from) * easeOut(t);
     drawWheel();
@@ -469,6 +472,20 @@ function finishSpin(expected) {
   celebrate(finalOne ? 'final' : 'round');
   fanfare(finalOne ? 'final' : 'round');
   showWinner(name);
+}
+
+// Deja la ruleta como recién abierta: sin giro en curso, sin modal, sin confeti.
+function stopEverything() {
+  state.spinId++;
+  state.spinning = false;
+  clearTimeout(state.guard);
+  clearTimeout(flashTimer);
+  cancelAnimationFrame(fxRaf);
+  fxRaf = 0; fxItems = []; fxRings = [];
+  fxCtx.clearRect(0, 0, size, size);
+  state.rotation = 0;
+  $('spinBtn').disabled = false;
+  $('modal').hidden = true;
 }
 
 /* ================= modal ================= */
@@ -555,6 +572,7 @@ function renderHistory() {
 }
 
 function loadNames() {
+  stopEverything(); // cargar lista = sorteo nuevo desde cero
   let list = parseNames($('namesInput').value);
   if ($('dedupe').checked) list = dedupe(list);
   if ($('shuffle').checked) list = shuffleList(list);
@@ -562,12 +580,12 @@ function loadNames() {
   state.removed = [];
   state.history = [];
   state.round = 0;
-  state.rotation = 0;
   drawWheel(); renderHistory(); save();
   status(list.length ? `${list.length} participantes cargados.` : 'No se detectó ningún nombre.');
 }
 
 function resetDraw() {
+  stopEverything();
   state.names = state.names.concat(state.removed);
   state.removed = [];
   state.history = [];
@@ -618,6 +636,7 @@ $('demoBtn').addEventListener('click', () => {
   loadNames();
 });
 $('clearBtn').addEventListener('click', () => {
+  stopEverything();
   $('namesInput').value = '';
   state.names = []; state.removed = []; state.history = []; state.round = 0;
   drawWheel(); renderHistory(); save(); status('Lista vacía.');

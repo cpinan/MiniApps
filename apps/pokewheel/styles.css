@@ -95,8 +95,17 @@ button:active{transform:translateY(1px)}
   border-left:16px solid transparent;border-right:16px solid transparent;border-top:30px solid var(--gold);
   filter:drop-shadow(0 3px 4px rgba(0,0,0,.6))}
 .spin{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:23%;height:23%;padding:0;
-  border:none;background:none;border-radius:50%;z-index:2}
-.spin:disabled{cursor:not-allowed;filter:grayscale(.6) brightness(.8)}
+  border:none;background:none;border-radius:50%;z-index:2;cursor:pointer;
+  -webkit-user-drag:none;user-select:none;-webkit-user-select:none;touch-action:manipulation;
+  transition:transform .12s cubic-bezier(.2,1.4,.4,1),filter .12s ease}
+.spin *{pointer-events:none;-webkit-user-drag:none}
+/* idle → hover → pressed */
+.spin:hover:not(:disabled){transform:translate(-50%,-50%) scale(1.07)}
+.spin:focus-visible{outline:3px solid var(--gold);outline-offset:4px;border-radius:50%}
+.spin:active:not(:disabled){transform:translate(-50%,-50%) scale(.93);filter:brightness(.9)}
+.spin:active:not(:disabled) .ball{box-shadow:0 2px 6px rgba(0,0,0,.6), inset 0 -4px 10px rgba(0,0,0,.4)}
+.spin:active:not(:disabled) .ball-btn{background:var(--gold);box-shadow:inset 0 0 0 2px rgba(0,0,0,.25)}
+.spin:disabled{cursor:progress;filter:grayscale(.6) brightness(.8);transform:translate(-50%,-50%) scale(.97)}
 .ball{display:block;width:100%;height:100%;border-radius:50%;position:relative;
   background:linear-gradient(#fff 0 0) no-repeat;
   background-image:linear-gradient(var(--accent) 0 47%, #111 47% 53%, #f2f2f2 53% 100%);
@@ -104,7 +113,7 @@ button:active{transform:translateY(1px)}
 .ball-btn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:34%;height:34%;border-radius:50%;
   background:#fff;border:3px solid #111;box-shadow:inset 0 0 0 2px #ddd}
 .spin:not(:disabled):hover .ball-btn{background:var(--gold)}
-.round{font-family:var(--pixel);font-size:10px;color:var(--muted);margin:0;text-align:center;transition:color .2s ease}
+.round{font-family:var(--pixel);font-size:10px;color:var(--muted);margin:14px 0 0;text-align:center;line-height:1.7;transition:color .2s ease}
 .round.flash{color:var(--accent);animation:nudge .4s ease}
 @keyframes nudge{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
 
@@ -165,6 +174,7 @@ button:active{transform:translateY(1px)}
 @media(prefers-reduced-motion:reduce){
   .rays,.trophy,.ltr{animation:none}
   .modal-card.final .modal-title{color:var(--gold);animation:none;text-shadow:0 0 12px color-mix(in srgb,var(--gold) 50%, transparent)}
+  .spin,.spin:hover:not(:disabled),.spin:active:not(:disabled){transition:none}
   .modal-card{animation:none}
   .round.flash{animation:none}
   .card,button{transition:none}
