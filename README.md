@@ -91,29 +91,45 @@ python3 -m http.server 8080
 ## Verificar
 
 ```bash
-npm test          # las dos suites
-npm run test:unit # solo lógica pura
-npm run test:browser
+tools/verify.sh          # todo: 7 suites, 339 checks
+npm test                 # lo mismo
+npm run test:prices      # una suite suelta
 ```
 
-Sin dependencias: `node` y (para la suite de navegador) Chrome instalado.
+Sin dependencias: `node` y (para las suites de navegador) Chrome instalado. Las suites que
+necesitan Chrome se saltan solas si no lo encuentran.
 
-- **`tests/pokewheel.test.mjs`** — extrae las funciones puras de `app.js` (parseo, aleatoriedad,
-  matemática del giro): 15 casos, incluidos 1600 giros comprobando que la flecha cae siempre en
-  el segmento elegido.
-- **`tests/browser.test.mjs`** — Chrome headless por CDP, 63 casos: que la rueda **gira** de
-  verdad (hash de píxeles del canvas cambiando a mitad del giro), el modal del ganador, volver a
-  girar tras cerrar una tanda (cinco giros con clics de ratón reales), la celebración del
-  ganador, que cargar lista reinicia el sorteo, los estados del botón, los colores
-  personalizados, y que nada se desborda en 390×844 ni en apaisado. Se salta solo si no
-  encuentra Chrome.
+| Suite | Qué cubre |
+|---|---|
+| `tests/pokewheel.test.mjs` | Funciones puras de la ruleta: parseo, aleatoriedad y matemática del giro, con 1600 giros comprobando que la flecha cae siempre en el segmento elegido. |
+| `tests/browser.test.mjs` | La ruleta en Chrome headless: que **gira** de verdad (hash de píxeles del canvas cambiando a mitad del giro), el modal, volver a girar tras cerrar una tanda con clics reales, la celebración y el botón *Reparar app*. |
+| `tests/teams.test.mjs` | Reparto en equipos parejos, capitanes, parejas prohibidas y el estado que viaja en la URL. |
+| `tests/secretsanta.test.mjs` | El ciclo único del sorteo y que cada link lleva solo su propia asignación. |
+| `tests/typechart.test.mjs` | Exactitud de la tabla de tipos, incluidos los duales, y la matriz 18×18. |
+| `tests/bingo.test.mjs` | Que no se repite ningún número, el tablero y el modo automático. |
+| `tests/pokeprice.test.mjs` | Las seis curvas de experiencia contra los totales conocidos del juego, la reversibilidad nivel ⇄ experiencia en los 600 niveles, los precios, el buscador de especies y la cotización. |
+
+**Toda suite nueva lleva chequeos de móvil**: sin scroll horizontal, targets ≥44 px, inputs ≥16 px
+y apaisado.
+
+Dos trampas que ya costaron una depuración cada una, por si aparecen otra vez:
+
+- Un test que emula móvil tiene que **limpiar la emulación antes de cerrar Chrome**. Si no, esa
+  ventana queda guardada en el perfil y la corrida *siguiente* abre con 390 px de alto: los clics
+  por coordenadas caen fuera de pantalla y fallan checks que no tienen nada que ver.
+- **No confiar en `<datalist>`** para un buscador: Chrome esconde sus sugerencias cuando el input
+  lleva `autocomplete="off"` y Safari apenas filtra, así que el predictivo parece roto sin que
+  haya ningún error. `apps/pokeprice/app.js` trae un combobox propio (`initCombo`) que sirve de
+  patrón.
 
 ## Publicar en GitHub Pages
 
-1. `git init && git add -A && git commit -m "feat: MiniApps + PokéRuleta"`
-2. Crea el repo y sube: `gh repo create MiniApps --public --source=. --push`
-3. Settings → Pages → *Deploy from a branch* → `main` / `root`.
-4. El archivo `.nojekyll` ya está en el repo para que Pages no procese nada.
+El repo ya está publicado: cada push a `main` despliega en
+https://cpinan.github.io/MiniApps/ en un par de minutos. Settings → Pages está en *Deploy from a
+branch* → `main` / `root`, y el `.nojekyll` evita que Pages procese nada.
+
+Tras un despliegue, comprobar con la URL tal cual — un `//` de más mide la página equivocada y
+parece un despliegue roto que no lo está.
 
 ## Cómo está armado
 
@@ -127,8 +143,8 @@ tools/make-icons.py     genera los iconos PNG de cada app con PIL
 ```
 
 Cada app trae su propio service worker (network-first) y su sello de build con botón
-**Reparar app**. La lógica sorteable de cada una vive en su módulo puro (`split.js`, `draw.js`,
-`types.js`) para poder testearla sin navegador.
+**Reparar app**. La lógica testeable de cada una vive en su módulo puro (`split.js`, `draw.js`,
+`types.js`, `exp.js`) para poder probarla sin navegador.
 
 ## Agregar una miniapp nueva
 
