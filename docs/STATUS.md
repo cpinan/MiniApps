@@ -21,6 +21,9 @@ Construir la app de **temporizador** (`apps/timer/`) siguiendo la Fase 1 de `doc
   azar sin sesgo, confeti, sonido y arranque PWA. `pokewheel` es la única que no lo usa: tiene su
   propio CSS/JS porque nació antes y funciona; migrarla no es urgente.
 - **339 checks verdes** en siete suites (`npm test`), con chequeos de móvil obligatorios en todas.
+- **El arnés de navegador es de fiar**: `tests/lib/cdp.mjs` borra el perfil de Chrome en cada
+  arranque y `clickReal` lleva el elemento a la vista y comprueba que el clic es suyo. Una suite
+  nueva puede llamar a `clickReal` sin precauciones propias.
 - **Donaciones**: `FUNDING.yml`, `DONATE.md`/`DONATE_ES.md` con QR de Yape/Plin, y botón dorado
   animado arriba en el hub y en la cabecera de cada app. No hay banners ni ventanas, y las páginas
   de donación lo prometen por escrito.
@@ -57,8 +60,6 @@ python3 -m http.server 8181   # y abrir http://localhost:8181/
   github.com/cpinan/MiniApps. Sin ese tick, GitHub ignora `.github/FUNDING.yml` y no dibuja el
   botón *Sponsor*.
 - ¿Se migra `pokewheel` al núcleo compartido, o se deja como está?
-- Si una pestaña vieja de `localhost:8181` enseña una versión antigua, es el service worker que
-  quedó registrado en ese origen: botón *Reparar app*.
 
 ## No repetir
 
