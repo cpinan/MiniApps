@@ -1,6 +1,6 @@
 # STATUS — MiniApps
 
-_Última actualización: 2026-08-29 · rama `main` · publicado_
+_Última actualización: 2026-08-29 · rama `main` · 0 archivos sin commitear_
 
 ## Próxima acción
 
@@ -31,7 +31,9 @@ Construir la app de **temporizador** (`apps/timer/`) siguiendo la Fase 1 de `doc
 
 ## En vuelo
 
-Nada en vuelo. El árbol está limpio y todo está pusheado.
+Nada en vuelo. El árbol está limpio, todo está pusheado y `v1.3.0` está desplegado y comprobado
+en producción con un navegador de verdad (sin errores de consola, buscador filtrando, curva
+bloqueada, precio correcto).
 
 Lo siguiente, ya especificado en `docs/ROADMAP.md` §3 (Fase 1):
 
@@ -55,6 +57,13 @@ python3 -m http.server 8181   # y abrir http://localhost:8181/
   github.com/cpinan/MiniApps. Sin ese tick, GitHub ignora `.github/FUNDING.yml` y no dibuja el
   botón *Sponsor*.
 - ¿Se migra `pokewheel` al núcleo compartido, o se deja como está?
+- **Decidir si se propaga el arreglo de clics a las otras seis suites.** Solo
+  `tests/pokeprice.test.mjs` limpia la emulación de móvil al salir y desplaza el elemento a la
+  vista antes de pulsar (`hit()`). Las otras seis siguen llamando a `clickReal` directamente y
+  pueden fallar por lo mismo. El arreglo limpio sería meter el `scrollIntoView` dentro de
+  `clickReal`, en `tests/lib/cdp.mjs:90`, que las cubre todas de una.
+- El servidor local del 8181 se apagó al cerrar la sesión. Si una pestaña vieja de
+  `localhost:8181` enseña una versión antigua, es el service worker: botón *Reparar app*.
 
 ## No repetir
 
