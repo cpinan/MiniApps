@@ -1,0 +1,17 @@
+{
+  "name": "Cotizador PokeMMO",
+  "short_name": "Cotizador",
+  "description": "Precio del entrenamiento por experiencia hasta nivel 65 y de la crianza 2×31, con tarifas propias y cotización lista para copiar.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0B101C",
+  "theme_color": "#2FBFC9",
+  "lang": "es",
+  "categories": ["utilities", "productivity", "finance"],
+  "icons": [
+    { "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "./icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

@@ -80,11 +80,32 @@ def bingo(size, pad=0.0):
     centered(d, [S*0.26, S*0.26, S*0.74, S*0.74], "7", f, (255, 255, 255, 255))
     return img
 
+
+def pokeprice(size, pad=0.0):
+    """Moneda dorada con $ y una pokéball detrás: precio + PokeMMO."""
+    img, d = canvas(size, bg=(11, 16, 28, 255))
+    S = size * SS
+    p = S * pad
+    # pokéball abajo a la derecha
+    bx0, by0, bx1, by1 = S*0.42+p, S*0.42+p, S*0.90-p, S*0.90-p
+    d.ellipse([bx0, by0, bx1, by1], fill=(245, 245, 245, 255), outline=(24, 24, 26, 255), width=int(S*0.028))
+    d.pieslice([bx0, by0, bx1, by1], 180, 360, fill=(47, 191, 201, 255), outline=(24, 24, 26, 255), width=int(S*0.028))
+    cx, cy = (bx0+bx1)/2, (by0+by1)/2
+    r = S*0.055
+    d.ellipse([cx-r, cy-r, cx+r, cy+r], fill=(245, 245, 245, 255), outline=(24, 24, 26, 255), width=int(S*0.024))
+    # moneda arriba a la izquierda, encima
+    mx0, my0, mx1, my1 = S*0.08+p, S*0.08+p, S*0.60-p, S*0.60-p
+    d.ellipse([mx0, my0, mx1, my1], fill=(240, 180, 41, 255), outline=(138, 108, 5, 255), width=int(S*0.035))
+    f = font(int(S*0.30))
+    centered(d, [mx0, my0, mx1, my1], "$", f, (34, 26, 5, 255))
+    return img
+
 APPS = {
     "apps/teams/icons": teams,
     "apps/secretsanta/icons": gift,
     "apps/typechart/icons": shield,
     "apps/bingo/icons": bingo,
+    "apps/pokeprice/icons": pokeprice,
 }
 
 for out, draw in APPS.items():

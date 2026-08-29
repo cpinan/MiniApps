@@ -13,6 +13,7 @@ publicar en GitHub Pages y compartir con un link.
 | 🎲 **Equipos** | Reparte una lista en equipos parejos, con capitanes fijos y parejas que no deben coincidir. | [abrir](https://cpinan.github.io/MiniApps/apps/teams/) |
 | 🎁 **Amigo secreto** | Sortea y da un link por persona; la asignación viaja en la URL, sin servidor. | [abrir](https://cpinan.github.io/MiniApps/apps/secretsanta/) |
 | 🛡️ **Tabla de tipos** | Efectividad de los 18 tipos: ataque, defensa dual y matriz completa, offline. | [abrir](https://cpinan.github.io/MiniApps/apps/typechart/) |
+| 💰 **Cotizador PokeMMO** | Precio de entrenamiento por experiencia hasta nivel 65 y de crianza 2×31, con tus tarifas y la cotización lista para pegar. | [abrir](https://cpinan.github.io/MiniApps/apps/pokeprice/) |
 | 🔢 **Bolillero** | Bingo: saca números sin repetir y los canta con la voz del navegador. | [abrir](https://cpinan.github.io/MiniApps/apps/bingo/) |
 
 Historial de cambios en [CHANGELOG.md](CHANGELOG.md). Plan de lo que viene, con la investigación
@@ -47,6 +48,36 @@ Documentación completa en [`apps/pokewheel/README.md`](apps/pokewheel/README.md
 - Botón **Reparar app**: desregistra service workers, borra cachés y recarga saltándose la caché
   HTTP. La salida cuando un service worker viejo dejó pegada una versión con bugs.
 - Atajos: `Espacio` gira, `Esc` cierra el modal. La rueda entera es clickable.
+
+## Cotizador PokeMMO
+
+`apps/pokeprice/` — la calculadora de un vendedor de servicios de PokeMMO, no un pokédex.
+
+- **Entrenamiento por experiencia.** La tarifa es *X por cada Y de experiencia*, configurable, con
+  el bloque empezado cobrado entero o al detalle, y un mínimo por Pokémon opcional. El tope del
+  servicio es el **nivel 65**.
+- **La experiencia sale de la curva real** de gen 3+, la que usa PokeMMO: errática, rápida, media
+  rápida, media lenta, lenta y fluctuante. Los seis totales al nivel 100 (600.000 · 800.000 ·
+  1.000.000 · 1.059.860 · 1.250.000 · 1.640.000) están cubiertos por tests, porque si una curva
+  está mal toda la app cobra mal.
+- **Se parte del nivel o de la experiencia exacta.** Un cliente que dice "tengo 200.000 de exp"
+  no paga lo mismo que uno que dice "estoy en nivel 54", y cambiar de modo conserva el punto.
+- **Cuánto le alcanza al cliente**: se escribe su presupuesto y sale hasta qué nivel llega.
+- **Crianza 2×31**: precio base más recargo por especie, con extras por naturaleza, sexo,
+  movimientos huevo, IVs de más y entrega ya entrenado a 65.
+- **La curva va amarrada al Pokémon.** La tabla trae 169 especies, ordenada alfabéticamente, con su
+  curva de experiencia y una dificultad de crianza — común, rara, o sin género y por tanto solo
+  criable con Ditto. Si la especie está en la tabla su curva manda y el desplegable queda
+  bloqueado; solo se elige a mano cuando la especie no está. La dificultad, en cambio, es criterio
+  de mercado y se edita en *Tarifas*.
+- **Cada curva se nombra por su experiencia total al nivel 100** — 1.059.860, 1.250.000… —, que es
+  como la reconoce el jugador dentro del juego, y no por su nombre técnico.
+- **Buscador propio, no `<datalist>`**: filtra al escribir, se abre entero como catálogo, va con
+  flechas y Enter y enseña la curva junto a cada nombre. El nativo no valía — Chrome esconde las
+  sugerencias cuando el input lleva `autocomplete="off"`.
+- **Pedido y cotización**: se acumulan entrenamientos y crianzas, se aplica descuento y adelanto,
+  y sale un texto plano listo para copiar o compartir con el cliente.
+- Todo vive en `localStorage`: las tarifas son tuyas y no salen del dispositivo.
 
 ## Correr en local
 

@@ -1,6 +1,6 @@
 # STATUS — MiniApps
 
-_Última actualización: 2026-08-28 · rama `main` · 0 archivos sin commitear_
+_Última actualización: 2026-08-29 · rama `main` · publicado_
 
 ## Próxima acción
 
@@ -8,21 +8,26 @@ Construir la app de **temporizador** (`apps/timer/`) siguiendo la Fase 1 de `doc
 
 ## Estado
 
-- **Cinco apps publicadas y verificadas en producción** en https://cpinan.github.io/MiniApps/ —
+- **Seis apps publicadas y verificadas en producción** en https://cpinan.github.io/MiniApps/ —
   `pokewheel` (ruleta), `teams` (equipos), `secretsanta` (amigo secreto), `typechart` (tabla de
-  tipos), `bingo` (bolillero). Cada una es PWA instalable y offline, con su service worker
-  network-first, sello de build y botón "Reparar app".
+  tipos), `bingo` (bolillero) y `pokeprice` (cotizador de PokeMMO). Cada una es PWA instalable y
+  offline, con su service worker network-first, sello de build y botón "Reparar app".
+- **`apps/pokeprice/` (💰 Cotizador PokeMMO)**: precio de entrenamiento por experiencia hasta nivel
+  65 y de crianza 2×31, con tarifas editables, pedido de varias líneas y texto de cotización para
+  el cliente. La lógica pura vive en `apps/pokeprice/exp.js` (seis curvas de experiencia de gen
+  3+, precios y 169 especies) y los 91 checks en `tests/pokeprice.test.mjs`. La curva va amarrada a
+  la especie y se nombra por su experiencia total al nivel 100, que es como la reconoce el jugador.
 - **Núcleo compartido** en `assets/shared/` (`base.css` + `core.js`): temas, parseo de listas,
   azar sin sesgo, confeti, sonido y arranque PWA. `pokewheel` es la única que no lo usa: tiene su
   propio CSS/JS porque nació antes y funciona; migrarla no es urgente.
-- **252 checks verdes** en seis suites (`npm test`), con chequeos de móvil obligatorios en todas.
+- **339 checks verdes** en siete suites (`npm test`), con chequeos de móvil obligatorios en todas.
 - **Donaciones**: `FUNDING.yml`, `DONATE.md`/`DONATE_ES.md` con QR de Yape/Plin, y botón dorado
   animado arriba en el hub y en la cabecera de cada app. No hay banners ni ventanas, y las páginas
   de donación lo prometen por escrito.
 - **Plan de lo que sigue**: `docs/ROADMAP.md`, escrito a partir de investigación de mercado
   (categoría de pantalla de aula, sorteos en español, daily puzzles, herramientas client-side y
   tools de PokeMMO). `docs/IDEAS.md` es la lluvia de ideas cruda.
-- Tags publicados: `v1.0.0`, `v1.1.0`, `v1.2.0`, `v1.2.1`.
+- Tags publicados: `v1.0.0`, `v1.1.0`, `v1.2.0`, `v1.2.1`, `v1.3.0`.
 
 ## En vuelo
 
@@ -40,7 +45,7 @@ Lo siguiente, ya especificado en `docs/ROADMAP.md` §3 (Fase 1):
 ## Verificar
 
 ```bash
-tools/verify.sh          # = npm test: 6 suites, 252 checks
+tools/verify.sh          # = npm test: 7 suites, 339 checks
 python3 -m http.server 8181   # y abrir http://localhost:8181/
 ```
 
@@ -68,3 +73,11 @@ python3 -m http.server 8181   # y abrir http://localhost:8181/
   `-webkit-text-fill-color:transparent` y el texto desaparece.
 - **No verificar producción con URLs construidas a mano**: un `//` de más hace medir la página
   equivocada y parece un despliegue roto que no lo está.
+- **No confiar en `<datalist>` para un buscador**: Chrome esconde las sugerencias cuando el input
+  lleva `autocomplete="off"` y Safari apenas filtra, así que el predictivo parece roto sin que haya
+  ningún error. `apps/pokeprice/app.js` trae un combobox propio (`initCombo`) que sirve de patrón.
+- **No dejar la emulación de móvil puesta al cerrar un test de navegador**: Chrome guarda esa
+  ventana en su perfil y la corrida *siguiente* abre con 390 px de alto, así que `clickReal`
+  pulsa fuera de pantalla y fallan checks que no tienen nada que ver. Salida:
+  `Emulation.clearDeviceMetricsOverride` antes de cerrar, y desplazar el elemento a la vista antes
+  de cada clic (`hit()` en `tests/pokeprice.test.mjs`).

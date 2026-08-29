@@ -4,6 +4,42 @@ Todos los cambios relevantes de este repo. Formato basado en
 [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y
 [SemVer](https://semver.org/lang/es/).
 
+## [1.3.0] — 2026-08-29
+
+### Añadido
+
+- **💰 Cotizador PokeMMO** (`apps/pokeprice/`): calculadora de precios para quien vende servicios
+  en PokeMMO. Dos servicios en una app:
+  - **Entrenamiento por experiencia hasta nivel 65.** Tarifa *X por cada Y de experiencia*, con
+    redondeo por bloque empezado o proporcional y un mínimo por Pokémon. La experiencia sale de las
+    seis curvas de gen 3+ (errática, rápida, media rápida, media lenta, lenta y fluctuante)
+    implementadas con las fórmulas del juego, no con una tabla copiada. Se puede partir del nivel
+    actual o de la experiencia total exacta, y cambiar de modo conserva el mismo punto. Cada curva
+    se nombra por su **experiencia total al nivel 100** — 1.059.860, 1.250.000… —, que es como la
+    reconoce el jugador dentro de PokeMMO, no por su nombre técnico. La curva **va amarrada a la
+    especie**: si el Pokémon está en la tabla, su curva es la suya y el desplegable queda
+    bloqueado; solo se elige a mano cuando la especie no está en la lista.
+  - **Crianza 2×31**: base más recargo por especie, y extras por naturaleza, sexo, movimientos
+    huevo, IVs adicionales y entrega ya entrenado.
+  - **Pedido con varias líneas**, descuento, adelanto y un texto de cotización listo para copiar o
+    compartir con el cliente.
+  - Extra para vender: se escribe el presupuesto del cliente y la app dice hasta qué nivel llega.
+- Tabla de 169 especies, ordenada alfabéticamente, con su curva de experiencia y una dificultad de
+  crianza sugerida (común / rara / sin género).
+- **Buscador de especies propio** en vez de `<datalist>`: filtra según se escribe (primero las que
+  empiezan igual, después las que contienen el trozo), se abre entero como catálogo, se maneja con
+  flechas y Enter, y enseña la curva junto a cada nombre. El `<datalist>` nativo no servía: Chrome
+  esconde sus sugerencias cuando el input lleva `autocomplete="off"` y Safari apenas filtra. La curva siempre se puede elegir a mano, así que una especie que no
+  esté en la tabla no bloquea nada.
+- 91 checks nuevos en `tests/pokeprice.test.mjs`, incluidos los seis totales de experiencia al
+  nivel 100 y la reversibilidad nivel ⇄ experiencia en los 600 niveles de las seis curvas.
+
+### Corregido
+
+- Los tests de navegador que emulaban un móvil dejaban esa ventana guardada en el perfil de Chrome,
+  así que la corrida siguiente abría con 390 px de alto y los clics por coordenadas caían fuera de
+  pantalla. Ahora la emulación se limpia al terminar y cada clic desplaza el elemento a la vista.
+
 ## [1.2.1] — 2026-08-28
 
 ### Cambiado

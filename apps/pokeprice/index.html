@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Cotizador PokeMMO</title>
+<meta name="description" content="Calcula el precio de tus servicios de PokeMMO: entrenamiento por experiencia hasta nivel 65 y crianza 2×31 con recargo por especie. Offline y sin anuncios.">
+<meta name="theme-color" content="#2FBFC9">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;700;900&display=swap">
+<link rel="stylesheet" href="../../assets/shared/base.css">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body data-theme="pokemmo">
+
+<header class="topbar">
+  <a class="back" href="../../index.html" title="Volver a MiniApps">&#8592;</a>
+  <h1 class="logo"><span class="logo-ball" aria-hidden="true"></span> Cotizador</h1>
+  <a class="donate" href="https://github.com/cpinan/MiniApps/blob/main/DONATE_ES.md"
+     target="_blank" rel="noopener" title="Apoyar MiniApps · gratis y sin anuncios"
+     aria-label="Donar"><span class="cup" aria-hidden="true">☕</span><span class="donate-text">Donar</span></a>
+  <button id="themeBtn" class="ghost" type="button" title="Cambiar tema">Tema</button>
+</header>
+
+<main class="quoter">
+
+  <div class="tabs" role="tablist">
+    <button id="tabTrain" class="tab is-on" type="button" role="tab" aria-selected="true">Entrenamiento</button>
+    <button id="tabBreed" class="tab" type="button" role="tab" aria-selected="false">Crianza</button>
+    <button id="tabOrder" class="tab" type="button" role="tab" aria-selected="false">
+      Pedido <span id="orderCount" class="pill">0</span></button>
+    <button id="tabRates" class="tab" type="button" role="tab" aria-selected="false">Tarifas</button>
+  </div>
+
+  <!-- ==================== ENTRENAMIENTO ==================== -->
+  <section id="panelTrain" class="panel-box" role="tabpanel" aria-labelledby="tabTrain">
+    <p class="lead">Cobras <b id="leadRate">—</b>. El tope del servicio es el <b>nivel 65</b>.</p>
+
+    <div class="grid2">
+      <div class="field">
+        <label for="trSpecies">Especie <span class="opt">(opcional)</span></label>
+        <div class="combo">
+          <input id="trSpecies" type="text" placeholder="Escribe o abre la lista" autocomplete="off"
+                 spellcheck="false" enterkeyhint="done" role="combobox" aria-expanded="false"
+                 aria-controls="trSpeciesList" aria-autocomplete="list">
+          <button class="combo-toggle" type="button" data-combo="trSpecies"
+                  aria-label="Ver todas las especies" tabindex="-1">▾</button>
+          <ul id="trSpeciesList" class="combo-list" role="listbox" hidden></ul>
+        </div>
+      </div>
+      <label class="field">Curva de experiencia <span class="opt">(su EXP total a nivel 100)</span>
+        <select id="trGroup"></select>
+      </label>
+    </div>
+    <p class="hint" id="trCurveNote"></p>
+
+    <div class="grid3">
+      <label class="field">Punto de partida
+        <select id="trFromMode">
+          <option value="nivel">Por nivel actual</option>
+          <option value="exp">Por experiencia total</option>
+        </select>
+      </label>
+      <label class="field" id="trFromWrap"><span id="trFromLabel">Nivel actual</span>
+        <input id="trFrom" type="number" inputmode="numeric" min="1" max="64" step="1" value="1">
+      </label>
+      <label class="field">Nivel objetivo
+        <input id="trTo" type="number" inputmode="numeric" min="2" max="65" step="1" value="65">
+      </label>
+    </div>
+
+    <p class="hint" id="trFromNote"></p>
+
+    <section id="trResult" class="result" aria-live="polite"></section>
+
+    <div class="row actions">
+      <label class="field inline">Cantidad
+        <input id="trQty" type="number" inputmode="numeric" min="1" max="99" step="1" value="1">
+      </label>
+      <button id="trAdd" class="primary" type="button">Añadir al pedido</button>
+    </div>
+
+    <details class="block">
+      <summary>¿Hasta dónde le alcanza al cliente?</summary>
+      <label class="field">Presupuesto del cliente
+        <input id="trBudget" type="number" inputmode="numeric" min="0" step="1000" placeholder="50000">
+      </label>
+      <p class="hint" id="trBudgetOut">Escribe un monto y te digo hasta qué nivel llega desde el nivel actual.</p>
+    </details>
+  </section>
+
+  <!-- ==================== CRIANZA ==================== -->
+  <section id="panelBreed" class="panel-box" role="tabpanel" aria-labelledby="tabBreed" hidden>
+    <p class="lead">Crianza <b>2×31</b>: precio base <b id="leadBreed">—</b> más lo que sume la especie y los extras.</p>
+
+    <div class="grid2">
+      <div class="field">
+        <label for="brSpecies">Especie</label>
+        <div class="combo">
+          <input id="brSpecies" type="text" placeholder="Escribe o abre la lista" autocomplete="off"
+                 spellcheck="false" enterkeyhint="done" role="combobox" aria-expanded="false"
+                 aria-controls="brSpeciesList" aria-autocomplete="list">
+          <button class="combo-toggle" type="button" data-combo="brSpecies"
+                  aria-label="Ver todas las especies" tabindex="-1">▾</button>
+          <ul id="brSpeciesList" class="combo-list" role="listbox" hidden></ul>
+        </div>
+      </div>
+      <label class="field">Recargo por especie
+        <input id="brSurcharge" type="number" inputmode="numeric" min="0" step="1000" value="0">
+      </label>
+    </div>
+    <p class="hint" id="brTierNote">El recargo se rellena solo según la dificultad que tenga la especie en Tarifas; puedes cambiarlo a mano.</p>
+
+    <div class="extras">
+      <label class="check"><input id="brNature" type="checkbox"> Naturaleza pedida <span class="tagmoney" id="tagNature"></span></label>
+      <label class="check"><input id="brGender" type="checkbox"> Sexo pedido <span class="tagmoney" id="tagGender"></span></label>
+      <label class="check"><input id="brTrained" type="checkbox"> Entregado entrenado a 65 <span class="tagmoney" id="tagTrained"></span></label>
+    </div>
+
+    <div class="grid3">
+      <label class="field">Movimientos huevo
+        <input id="brMoves" type="number" inputmode="numeric" min="0" max="4" step="1" value="0">
+      </label>
+      <label class="field">IV extra (más allá de 2×31)
+        <input id="brIvs" type="number" inputmode="numeric" min="0" max="4" step="1" value="0">
+      </label>
+      <label class="field">Cantidad
+        <input id="brQty" type="number" inputmode="numeric" min="1" max="99" step="1" value="1">
+      </label>
+    </div>
+
+    <section id="brResult" class="result" aria-live="polite"></section>
+
+    <div class="row actions">
+      <button id="brAdd" class="primary" type="button">Añadir al pedido</button>
+    </div>
+  </section>
+
+  <!-- ==================== PEDIDO ==================== -->
+  <section id="panelOrder" class="panel-box" role="tabpanel" aria-labelledby="tabOrder" hidden>
+    <label class="field">Cliente <span class="opt">(sale en la cotización)</span>
+      <input id="clientName" type="text" placeholder="Nombre en el juego" autocomplete="off">
+    </label>
+
+    <section id="orderList" class="order-list" aria-live="polite"></section>
+
+    <div class="grid2">
+      <label class="field">Descuento %
+        <input id="orderDiscount" type="number" inputmode="numeric" min="0" max="100" step="1" value="0">
+      </label>
+      <label class="field">Adelanto %
+        <input id="orderDeposit" type="number" inputmode="numeric" min="0" max="100" step="5" value="0">
+      </label>
+    </div>
+
+    <section id="orderTotals" class="totals" aria-live="polite"></section>
+
+    <label class="field">Texto para pegarle al cliente
+      <textarea id="quoteText" rows="10" readonly></textarea>
+    </label>
+    <div class="row">
+      <button id="copyQuote" class="primary" type="button">Copiar cotización</button>
+      <button id="shareQuote" class="ghost" type="button">Compartir</button>
+      <button id="clearOrder" class="ghost danger" type="button">Vaciar pedido</button>
+    </div>
+  </section>
+
+  <!-- ==================== TARIFAS ==================== -->
+  <section id="panelRates" class="panel-box" role="tabpanel" aria-labelledby="tabRates" hidden>
+    <p class="lead">Tus precios. Se guardan en este dispositivo y no salen de aquí.</p>
+
+    <details class="block" open>
+      <summary>Entrenamiento</summary>
+      <div class="grid3">
+        <label class="field">Cobro
+          <input id="rtPricePer" type="number" inputmode="numeric" min="0" step="500" value="5000">
+        </label>
+        <label class="field">por cada … de experiencia
+          <input id="rtExpPer" type="number" inputmode="numeric" min="1" step="1000" value="50000">
+        </label>
+        <label class="field">Redondeo
+          <select id="rtRounding">
+            <option value="bloque">Bloque empezado se cobra entero</option>
+            <option value="exacto">Proporcional al detalle</option>
+          </select>
+        </label>
+      </div>
+      <label class="field">Mínimo por Pokémon
+        <input id="rtMin" type="number" inputmode="numeric" min="0" step="1000" value="0">
+      </label>
+    </details>
+
+    <details class="block" open>
+      <summary>Crianza 2×31</summary>
+      <div class="grid2">
+        <label class="field">Precio base
+          <input id="rtBreedBase" type="number" inputmode="numeric" min="0" step="1000" value="150000">
+        </label>
+        <label class="field">Recargo especie común
+          <input id="rtTierComun" type="number" inputmode="numeric" min="0" step="1000" value="0">
+        </label>
+        <label class="field">Recargo especie rara
+          <input id="rtTierRaro" type="number" inputmode="numeric" min="0" step="1000" value="50000">
+        </label>
+        <label class="field">Recargo sin género (solo Ditto)
+          <input id="rtTierSin" type="number" inputmode="numeric" min="0" step="1000" value="80000">
+        </label>
+      </div>
+      <div class="grid2">
+        <label class="field">Naturaleza pedida
+          <input id="rtNature" type="number" inputmode="numeric" min="0" step="1000" value="20000">
+        </label>
+        <label class="field">Sexo pedido
+          <input id="rtGender" type="number" inputmode="numeric" min="0" step="1000" value="15000">
+        </label>
+        <label class="field">Por movimiento huevo
+          <input id="rtMove" type="number" inputmode="numeric" min="0" step="1000" value="15000">
+        </label>
+        <label class="field">Por IV extra sobre 2×31
+          <input id="rtIv" type="number" inputmode="numeric" min="0" step="1000" value="60000">
+        </label>
+      </div>
+      <label class="field">Entregado entrenado a 65
+        <input id="rtTrained" type="number" inputmode="numeric" min="0" step="1000" value="40000">
+      </label>
+    </details>
+
+    <details class="block">
+      <summary>Formato</summary>
+      <label class="field">Símbolo de moneda
+        <input id="rtCurrency" type="text" maxlength="4" value="$">
+      </label>
+    </details>
+
+    <div class="row">
+      <button id="rtReset" class="ghost danger" type="button">Restablecer tarifas</button>
+    </div>
+  </section>
+
+  <p class="hint" id="statusLine"></p>
+  <div class="footer-row">
+    <span class="hint build" id="buildTag"></span>
+    <button id="repairBtn" class="ghost tiny" type="button"
+      title="Borra la caché y el service worker, y recarga la última versión">Reparar app</button>
+  </div>
+</main>
+
+<script type="module" src="./app.js"></script>
+</body>
+</html>
