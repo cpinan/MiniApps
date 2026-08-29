@@ -157,16 +157,6 @@ check('el enlace de donación está arriba, se ve y late',
 check('arranca en la pestaña de entrenamiento',
   await app.evalJs("return document.getElementById('panelTrain').hidden === false && document.getElementById('panelRates').hidden === true;"));
 
-// `clickReal` pulsa por coordenadas de ventana: si el elemento está fuera de la
-// vista, el clic cae en otro sitio y el test falla por algo que no es el bug.
-// Pasa también entre corridas, porque la emulación de móvil del final se guarda
-// en el perfil de Chrome y la siguiente ventana abre con 390 px de alto.
-const hit = async (sel) => {
-  await app.evalJs(`document.querySelector('${sel}')?.scrollIntoView({ block: 'center' }); return 1;`);
-  await sleep(150);
-  return app.clickReal(sel);
-};
-
 const setVal = (sel, value, ev = 'input') =>
   app.evalJs(`const el = document.querySelector('${sel}');
     el.value = ${JSON.stringify(String(value))};
@@ -320,13 +310,13 @@ const budget = await app.evalJs(`const el = document.getElementById('trBudget');
 check('el presupuesto del cliente dice hasta qué nivel llega',
   /nivel \d+/.test(budget), budget);
 
-await hit('#trAdd');
+await app.clickReal('#trAdd');
 await sleep(250);
 check('añadir al pedido sube el contador',
   await app.evalJs("return document.getElementById('orderCount').textContent === '1';"));
 
 /* --- crianza --- */
-await hit('#tabBreed');
+await app.clickReal('#tabBreed');
 await sleep(200);
 const b0 = await app.evalJs("return document.querySelector('#brResult .price').textContent;");
 check('la crianza parte del precio base 150.000', digits(b0).startsWith('150000'), b0);
@@ -351,13 +341,13 @@ await sleep(200);
 check('cada movimiento huevo suma',
   digits(await app.evalJs("return document.querySelector('#brResult .price').textContent;")).startsWith('280000'));
 
-await hit('#brAdd');
+await app.clickReal('#brAdd');
 await sleep(250);
 check('la crianza también entra al pedido',
   await app.evalJs("return document.getElementById('orderCount').textContent === '2';"));
 
 /* --- pedido --- */
-await hit('#tabOrder');
+await app.clickReal('#tabOrder');
 await sleep(200);
 const ord = await app.evalJs(`return { items: document.querySelectorAll('#orderList .item').length,
   grand: document.querySelector('#orderTotals .grand').textContent,
@@ -381,27 +371,27 @@ await sleep(200);
 check('el adelanto parte el total en dos',
   /Adelanto 50%/.test(await app.evalJs("return document.getElementById('quoteText').value;")));
 
-await hit('[data-del]');
+await app.clickReal('[data-del]');
 await sleep(250);
 check('se puede quitar una línea del pedido',
   await app.evalJs("return document.querySelectorAll('#orderList .item').length === 1;"));
 
 /* --- tarifas --- */
-await hit('#tabRates');
+await app.clickReal('#tabRates');
 await sleep(200);
 await setVal('#rtPricePer', '9000');
 await sleep(200);
-await hit('#tabTrain');
+await app.clickReal('#tabTrain');
 await sleep(200);
 check('cambiar la tarifa recalcula el precio al vuelo',
   digits(await app.evalJs("return document.querySelector('#trResult .price').textContent;")).startsWith('63000'),
   await app.evalJs("return document.querySelector('#trResult .price').textContent;"));
 
-await hit('#tabRates');
+await app.clickReal('#tabRates');
 await sleep(150);
 await setVal('#rtCurrency', 'P$');
 await sleep(200);
-await hit('#tabTrain');
+await app.clickReal('#tabTrain');
 await sleep(200);
 check('el símbolo de moneda se aplica en todas partes',
   /P\$/.test(await app.evalJs("return document.querySelector('#trResult .price').textContent;")));
@@ -417,9 +407,9 @@ check('al recargar se conservan pedido, tarifas y formulario',
   kept.count === '1' && kept.price === '9000' && kept.currency === 'P$' && kept.species === 'Garchomp',
   JSON.stringify(kept));
 
-await hit('#tabRates');
+await app.clickReal('#tabRates');
 await sleep(150);
-await hit('#rtReset');
+await app.clickReal('#rtReset');
 await sleep(300);
 check('restablecer devuelve las tarifas de fábrica',
   await app.evalJs("return document.getElementById('rtPricePer').value === '5000' && document.getElementById('rtCurrency').value === '$';"));
@@ -427,7 +417,7 @@ check('restablecer devuelve las tarifas de fábrica',
 /* ---------------- móvil ---------------- */
 await app.send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 3, mobile: true });
 await sleep(400);
-await hit('#tabTrain');
+await app.clickReal('#tabTrain');
 await sleep(300);
 const mob = await app.evalJs(`const doc = document.documentElement;
   const tab = document.getElementById('tabTrain').getBoundingClientRect();
@@ -444,7 +434,7 @@ const donateTap = await app.evalJs(`const r = document.querySelector('.donate').
 check('móvil: el enlace de donación es tocable',
   donateTap.h >= 44 && donateTap.w >= 44, JSON.stringify(donateTap));
 
-await hit('#tabOrder');
+await app.clickReal('#tabOrder');
 await sleep(300);
 check('móvil: el pedido tampoco desborda',
   await app.evalJs("const d = document.documentElement; return d.scrollWidth - d.clientWidth <= 0;"));
@@ -455,11 +445,6 @@ check('apaisado: sin scroll horizontal',
   await app.evalJs("const d = document.documentElement; return d.scrollWidth - d.clientWidth <= 0;"));
 
 check('sin errores de consola tras toda la sesión', app.errors.length === 0, app.errors.join(' | '));
-
-// Sin esto, Chrome guarda en su perfil la ventana de móvil y la corrida
-// siguiente abre con 390 px de alto.
-await app.send('Emulation.clearDeviceMetricsOverride');
-await sleep(200);
 
 app.close();
 process.exit(done() ? 1 : 0);

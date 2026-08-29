@@ -57,13 +57,8 @@ python3 -m http.server 8181   # y abrir http://localhost:8181/
   github.com/cpinan/MiniApps. Sin ese tick, GitHub ignora `.github/FUNDING.yml` y no dibuja el
   botón *Sponsor*.
 - ¿Se migra `pokewheel` al núcleo compartido, o se deja como está?
-- **Decidir si se propaga el arreglo de clics a las otras seis suites.** Solo
-  `tests/pokeprice.test.mjs` limpia la emulación de móvil al salir y desplaza el elemento a la
-  vista antes de pulsar (`hit()`). Las otras seis siguen llamando a `clickReal` directamente y
-  pueden fallar por lo mismo. El arreglo limpio sería meter el `scrollIntoView` dentro de
-  `clickReal`, en `tests/lib/cdp.mjs:90`, que las cubre todas de una.
-- El servidor local del 8181 se apagó al cerrar la sesión. Si una pestaña vieja de
-  `localhost:8181` enseña una versión antigua, es el service worker: botón *Reparar app*.
+- Si una pestaña vieja de `localhost:8181` enseña una versión antigua, es el service worker que
+  quedó registrado en ese origen: botón *Reparar app*.
 
 ## No repetir
 
@@ -85,8 +80,12 @@ python3 -m http.server 8181   # y abrir http://localhost:8181/
 - **No confiar en `<datalist>` para un buscador**: Chrome esconde las sugerencias cuando el input
   lleva `autocomplete="off"` y Safari apenas filtra, así que el predictivo parece roto sin que haya
   ningún error. `apps/pokeprice/app.js` trae un combobox propio (`initCombo`) que sirve de patrón.
-- **No dejar la emulación de móvil puesta al cerrar un test de navegador**: Chrome guarda esa
-  ventana en su perfil y la corrida *siguiente* abre con 390 px de alto, así que `clickReal`
-  pulsa fuera de pantalla y fallan checks que no tienen nada que ver. Salida:
-  `Emulation.clearDeviceMetricsOverride` antes de cerrar, y desplazar el elemento a la vista antes
-  de cada clic (`hit()` en `tests/pokeprice.test.mjs`).
+- **La emulación de móvil de un test se hereda entre corridas**: Chrome guarda esa ventana en su
+  perfil y la corrida *siguiente* abre con 390 px de alto, así que `clickReal` pulsa fuera de
+  pantalla y fallan checks que no tienen nada que ver. **Ya está resuelto en el arnés**
+  (`tests/lib/cdp.mjs`): el perfil se borra en cada arranque y `clickReal` lleva el elemento a la
+  vista. No hace falta que cada suite se acuerde.
+- **`scrollIntoView({block:'nearest'})` no basta para poder pulsar**: deja el elemento pegado al
+  borde de arriba, que es donde está la cabecera sticky de todas las apps — cuenta como visible y
+  el clic se lo come la cabecera. `clickReal` comprueba con `elementFromPoint` que el punto es del
+  elemento y, si está tapado, lo centra y vuelve a mirar.

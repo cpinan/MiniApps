@@ -112,11 +112,19 @@ necesitan Chrome se saltan solas si no lo encuentran.
 **Toda suite nueva lleva chequeos de móvil**: sin scroll horizontal, targets ≥44 px, inputs ≥16 px
 y apaisado.
 
-Dos trampas que ya costaron una depuración cada una, por si aparecen otra vez:
+`tests/lib/cdp.mjs` se encarga de dos trampas que ya costaron una depuración cada una, así que
+ninguna suite tiene que acordarse de ellas:
 
-- Un test que emula móvil tiene que **limpiar la emulación antes de cerrar Chrome**. Si no, esa
-  ventana queda guardada en el perfil y la corrida *siguiente* abre con 390 px de alto: los clics
-  por coordenadas caen fuera de pantalla y fallan checks que no tienen nada que ver.
+- **El perfil de Chrome se borra en cada arranque.** Una suite que emula un móvil deja esa ventana
+  guardada en el perfil, y la corrida *siguiente* abría con 390 px de alto: los clics por
+  coordenadas caían fuera de pantalla y fallaban checks que no tenían nada que ver.
+- **`clickReal` lleva el elemento a la vista antes de pulsar**, y comprueba que el punto de clic es
+  suyo de verdad. Con `block:'nearest'` el elemento queda pegado al borde de arriba, que es donde
+  vive la cabecera sticky de todas las apps: contaba como visible y el clic se lo comía la
+  cabecera. Si el punto está tapado, se centra y se vuelve a mirar.
+
+Y una tercera que no es del arnés:
+
 - **No confiar en `<datalist>`** para un buscador: Chrome esconde sus sugerencias cuando el input
   lleva `autocomplete="off"` y Safari apenas filtra, así que el predictivo parece roto sin que
   haya ningún error. `apps/pokeprice/app.js` trae un combobox propio (`initCombo`) que sirve de
