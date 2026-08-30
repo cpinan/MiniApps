@@ -174,10 +174,33 @@ check('las curvas se ofrecen de menor a mayor experiencia', (() => {
 // Curvas que cualquier jugador puede comprobar en el juego.
 const SPOT = [['Garchomp', 'lento'], ['Blissey', 'rapido'], ['Milotic', 'erratico'],
   ['Breloom', 'fluctuante'], ['Gengar', 'medio_lento'], ['Eevee', 'medio_rapido'],
-  ['Charizard', 'medio_lento'], ['Metagross', 'lento'], ['Ferrothorn', 'medio_rapido']];
+  ['Charizard', 'medio_lento'], ['Metagross', 'lento'], ['Ferrothorn', 'medio_rapido'],
+  // curvas que la tabla escrita a mano tenía mal y la ROM corrigió
+  ['Ampharos', 'medio_lento'], ['Dusclops', 'rapido'], ['Electivire', 'medio_rapido'],
+  ['Magmortar', 'medio_rapido'], ['Toxicroak', 'medio_rapido'], ['Mantine', 'lento'],
+  ['Drapion', 'lento'], ['Jellicent', 'medio_rapido'], ['Klinklang', 'medio_lento'],
+  ['Golurk', 'medio_rapido'], ['Leavanny', 'medio_lento'], ['Scolipede', 'medio_lento']];
 const badSpot = SPOT.filter(([n, g]) => findSpecies(n)?.group !== g)
   .map(([n, g]) => `${n}: ${findSpecies(n)?.group} != ${g}`);
-check('nueve especies conocidas tienen la curva correcta', badSpot.length === 0, badSpot.join(' | '));
+check('las especies conocidas tienen la curva del juego', badSpot.length === 0, badSpot.join(' | '));
+
+// La tabla es el Pokédex de las cinco regiones menos legendarios: 649 - 48 = 601.
+check('están las 601 especies criables de PokeMMO', SPECIES.length === 601, String(SPECIES.length));
+const PREEVOS = [['Growlithe', 'lento'], ['Gible', 'lento'], ['Dratini', 'lento'],
+  ['Ralts', 'lento'], ['Riolu', 'medio_lento'], ['Larvitar', 'lento'],
+  ['Magikarp', 'lento'], ['Feebas', 'erratico'], ['Nidoran hembra', 'medio_lento']];
+const badPre = PREEVOS.filter(([n, g]) => findSpecies(n)?.group !== g)
+  .map(([n, g]) => `${n}: ${findSpecies(n)?.group ?? 'no está'} != ${g}`);
+check('las preevoluciones también están, con su curva', badPre.length === 0, badPre.join(' | '));
+check('los legendarios se quedan fuera: no se crían en el juego',
+  ['Mewtwo', 'Rayquaza', 'Zekrom', 'Celebi', 'Heatran'].every(n => findSpecies(n) === null));
+check('las preevoluciones heredan la dificultad de la familia',
+  findSpecies('Gible')?.tier === 'raro' && findSpecies('Beldum')?.tier === 'sin_genero'
+  && findSpecies('Rattata')?.tier === 'comun',
+  [findSpecies('Gible')?.tier, findSpecies('Beldum')?.tier, findSpecies('Rattata')?.tier].join(' | '));
+check('cada nombre se encuentra a sí mismo: no hay dos que se plieguen igual',
+  SPECIES.every(s => findSpecies(s.name) === s),
+  SPECIES.filter(s => findSpecies(s.name) !== s).map(s => s.name).join(', '));
 
 /* ---------------- navegador ---------------- */
 const app = await launch({ root: ROOT, port: 9541 });
@@ -250,7 +273,8 @@ await sleep(250);
 const typed = await app.evalJs(`const l = document.getElementById('trSpeciesList');
   return { names: [...l.children].map(li => li.querySelector('.cs-name').textContent) };`);
 check('escribir filtra, con los que empiezan igual primero',
-  typed.names[0] === 'Garchomp' && typed.names.includes('Gengar'), JSON.stringify(typed.names));
+  typed.names[0] === 'Garbodor' && typed.names.indexOf('Garchomp') < typed.names.indexOf('Gengar')
+  && typed.names.includes('Gengar'), JSON.stringify(typed.names));
 
 await setVal('#trSpecies', 'chomp');
 await sleep(250);
@@ -279,7 +303,7 @@ await app.evalJs(`const i = document.getElementById('trSpecies');
   i.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })); return 1;`);
 await sleep(250);
 check('el teclado también elige: dos flechas abajo y Enter',
-  await app.evalJs("return document.getElementById('trSpecies').value;") === 'Gardevoir',
+  await app.evalJs("return document.getElementById('trSpecies').value;") === 'Garchomp',
   await app.evalJs("return document.getElementById('trSpecies').value;"));
 
 await app.evalJs(`const i = document.getElementById('trSpecies');

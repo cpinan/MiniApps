@@ -6,6 +6,23 @@ Todos los cambios relevantes de este repo. Formato basado en
 
 ## [Sin publicar]
 
+### Añadido
+
+- **💰 Cotizador PokeMMO**: la tabla de especies pasa de 169 escritas a mano a las **601 criables**
+  del juego — el Pokédex de las cinco regiones (Kanto a Teselia) menos los legendarios, que no se
+  obtienen en PokeMMO. Ya salen las preevoluciones y las especies poco pedidas: Growlithe, Gible,
+  Dratini, Ralts, Feebas, Nidoran hembra/macho… Los grupos de crecimiento se sacaron de la tabla
+  `personal` de la ROM de Black que carga el propio cliente (`a/0/1/6`, byte `0x15`), así que son
+  exactamente los del juego. La dificultad de crianza se hereda dentro de la familia evolutiva
+  (Gible es rara como Garchomp) y las especies sin género se marcan solas.
+
+### Corregido
+
+- **💰 Cotizador PokeMMO**: **trece especies tenían la curva equivocada** y por tanto se cotizaban
+  mal — Ampharos, Mantine, Dusclops, Dusknoir, Electivire, Magmortar, Toxicroak, Drapion,
+  Jellicent, Klinklang, Golurk, Leavanny y Scolipede. Ahora cuadran con la ROM. También se marca
+  Starmie como sin género (solo cruza con Ditto).
+
 ### Cambiado
 
 - **💰 Cotizador PokeMMO**: el tope del servicio pasa del **nivel 65 al nivel 100**. Afecta al

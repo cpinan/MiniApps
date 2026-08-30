@@ -65,9 +65,11 @@ Documentación completa en [`apps/pokewheel/README.md`](apps/pokewheel/README.md
 - **Cuánto le alcanza al cliente**: se escribe su presupuesto y sale hasta qué nivel llega.
 - **Crianza 2×31**: precio base más recargo por especie, con extras por naturaleza, sexo,
   movimientos huevo, IVs de más y entrega ya entrenado a 100.
-- **La curva va amarrada al Pokémon.** La tabla trae 169 especies, ordenada alfabéticamente, con su
-  curva de experiencia y una dificultad de crianza — común, rara, o sin género y por tanto solo
-  criable con Ditto. Si la especie está en la tabla su curva manda y el desplegable queda
+- **La curva va amarrada al Pokémon.** La tabla trae las **601 especies criables** de PokeMMO —
+  el Pokédex entero de Kanto a Teselia menos los legendarios, que no se obtienen en el juego —,
+  ordenada alfabéticamente, con su curva de experiencia y una dificultad de crianza — común, rara,
+  o sin género y por tanto solo criable con Ditto. Las curvas salen de la tabla `personal` de la
+  ROM de Black que usa el propio cliente, no de una lista escrita a mano. Si la especie está en la tabla su curva manda y el desplegable queda
   bloqueado; solo se elige a mano cuando la especie no está. La dificultad, en cambio, es criterio
   de mercado y se edita en *Tarifas*.
 - **Cada curva se nombra por su experiencia total al nivel 100** — 1.059.860, 1.250.000… —, que es
