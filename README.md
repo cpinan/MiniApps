@@ -13,7 +13,7 @@ publicar en GitHub Pages y compartir con un link.
 | 🎲 **Equipos** | Reparte una lista en equipos parejos, con capitanes fijos y parejas que no deben coincidir. | [abrir](https://cpinan.github.io/MiniApps/apps/teams/) |
 | 🎁 **Amigo secreto** | Sortea y da un link por persona; la asignación viaja en la URL, sin servidor. | [abrir](https://cpinan.github.io/MiniApps/apps/secretsanta/) |
 | 🛡️ **Tabla de tipos** | Efectividad de los 18 tipos: ataque, defensa dual y matriz completa, offline. | [abrir](https://cpinan.github.io/MiniApps/apps/typechart/) |
-| 💰 **Cotizador PokeMMO** | Precio de entrenamiento por experiencia hasta nivel 100 y de crianza 2×31, con tus tarifas y la cotización lista para pegar. | [abrir](https://cpinan.github.io/MiniApps/apps/pokeprice/) |
+| 💰 **Cotizador PokeMMO** | Precio de entrenamiento por experiencia hasta nivel 100 y de crianza 2×31, con tus tarifas y el mensaje listo para pegar en WhatsApp. | [abrir](https://cpinan.github.io/MiniApps/apps/pokeprice/) |
 | 🔢 **Bolillero** | Bingo: saca números sin repetir y los canta con la voz del navegador. | [abrir](https://cpinan.github.io/MiniApps/apps/bingo/) |
 
 Historial de cambios en [CHANGELOG.md](CHANGELOG.md). Plan de lo que viene, con la investigación
@@ -79,9 +79,31 @@ Documentación completa en [`apps/pokewheel/README.md`](apps/pokewheel/README.md
   sugerencias cuando el input lleva `autocomplete="off"`.
 - **Pedido y cotización**: se acumulan entrenamientos y crianzas, se aplica descuento y adelanto,
   y sale un texto plano listo para copiar o compartir con el cliente. Ese texto es un mensaje de
-  WhatsApp, no una factura: una línea por servicio en palabras ("Arcanine — entrenar hasta nivel
-  100: $131,250") y el total. La experiencia, la curva y el desglose se quedan en pantalla, que es
-  donde le sirven a quien cotiza.
+  WhatsApp, no una factura: una línea por servicio en palabras y el total. La experiencia, la
+  curva y el desglose se quedan en pantalla, que es donde le sirven a quien cotiza.
+- **El mensaje dice el rango entero**: "entrenar del 1 al 100", nunca "hasta nivel 100" a secas.
+  Sin el punto de partida el cliente no distingue un Pokémon que se entrena desde cero de uno que
+  se recoge en el 40, que es la mitad del precio.
+- **Negritas de WhatsApp, y se eligen**: los asteriscos que WhatsApp convierte en negrita van, de
+  fábrica, en el Pokémon, el precio, el total, el adelanto y el descuento. Cinco casillas en la
+  pestaña *Pedido* apagan o encienden cada parte, y la elección se guarda con el pedido:
+
+  ```
+  Cotización · servicios PokeMMO · para Ash
+  30/8/2026
+
+  • *Garchomp* — entrenar del 1 al 100: *$125.000*
+  • *Metagross* ×2 — crianza 2×31, naturaleza, entrenado del 1 al 100: *$750.000* ($375.000 c/u)
+
+  Subtotal: $875.000
+  Descuento 10%: *−$87.500*
+  *TOTAL: $787.500*
+  Adelanto 50%: *$393.750* · el resto al entregar: $393.750
+  ```
+
+  La cantidad y el "c/u" se quedan fuera de los marcadores, y un asterisco escrito a mano en el
+  nombre de la especie o del cliente se cae del mensaje: WhatsApp no sabe escaparlo y partiría la
+  negrita a media palabra. En la pantalla el nombre se sigue viendo tal cual se escribió.
 - Todo vive en `localStorage`: las tarifas son tuyas y no salen del dispositivo.
 
 ## Correr en local
@@ -96,7 +118,7 @@ python3 -m http.server 8080
 ## Verificar
 
 ```bash
-tools/verify.sh          # todo: 7 suites, 339 checks
+tools/verify.sh          # todo: 7 suites, 396 checks
 npm test                 # lo mismo
 npm run test:prices      # una suite suelta
 ```
@@ -112,7 +134,7 @@ necesitan Chrome se saltan solas si no lo encuentran.
 | `tests/secretsanta.test.mjs` | El ciclo único del sorteo y que cada link lleva solo su propia asignación. |
 | `tests/typechart.test.mjs` | Exactitud de la tabla de tipos, incluidos los duales, y la matriz 18×18. |
 | `tests/bingo.test.mjs` | Que no se repite ningún número, el tablero y el modo automático. |
-| `tests/pokeprice.test.mjs` | Las seis curvas de experiencia contra los totales conocidos del juego, la reversibilidad nivel ⇄ experiencia en los 600 niveles, los precios, el buscador de especies y la cotización. |
+| `tests/pokeprice.test.mjs` | Las seis curvas de experiencia contra los totales conocidos del juego, la reversibilidad nivel ⇄ experiencia en los 600 niveles, los precios, el buscador de especies y el mensaje al cliente: el rango entero, cada negrita por separado, el portapapeles leído de verdad y lo que se le pasa a *Compartir*. |
 
 **Toda suite nueva lleva chequeos de móvil**: sin scroll horizontal, targets ≥44 px, inputs ≥16 px
 y apaisado.

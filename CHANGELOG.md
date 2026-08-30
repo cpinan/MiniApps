@@ -8,6 +8,13 @@ Todos los cambios relevantes de este repo. Formato basado en
 
 ### Añadido
 
+- **💰 Cotizador PokeMMO**: el mensaje al cliente sale con las **negritas de WhatsApp** puestas, y
+  se elige cuáles. Cinco casillas en la pestaña *Pedido* —Pokémon, precio, total, adelanto y
+  descuento—, encendidas de fábrica y guardadas junto al pedido; el subtotal se queda siempre en
+  plano, porque lo que se resalta es la rebaja. La cantidad y el "c/u" quedan fuera de los
+  asteriscos: WhatsApp corta la negrita cuando el marcador toca un espacio. Un asterisco escrito
+  a mano en la especie o en el nombre del cliente se cae del mensaje —no hay forma de escaparlo—,
+  aunque en la pantalla el nombre se sigue viendo tal cual se escribió.
 - **💰 Cotizador PokeMMO**: la tabla de especies pasa de 169 escritas a mano a las **601 criables**
   del juego — el Pokédex de las cinco regiones (Kanto a Teselia) menos los legendarios, que no se
   obtienen en PokeMMO. Ya salen las preevoluciones y las especies poco pedidas: Growlithe, Gible,
@@ -20,8 +27,13 @@ Todos los cambios relevantes de este repo. Formato basado en
 
 - **💰 Cotizador PokeMMO**: el texto que se le pega al cliente pasa de tres líneas por servicio a
   una. Se va la experiencia, el nombre de la curva y la línea de tarifa —datos de quien cotiza, no
-  del cliente— y queda "• Arcanine — entrenar hasta nivel 100: $131.250". El subtotal solo aparece
+  del cliente— y queda "• *Arcanine* — entrenar del 1 al 100: *$131.250*". El subtotal solo aparece
   si hay descuento. El desglose completo sigue en pantalla, en la lista del pedido.
+- **💰 Cotizador PokeMMO**: la línea del mensaje dice **el rango entero** — "entrenar del 1 al 100",
+  no "entrenar hasta nivel 100" —, y el extra de crianza pasa de "ya entrenado a 100" a "entrenado
+  del 1 al 100", que la cría también sale del huevo en el nivel 1. Sin el punto de partida, un
+  trabajo desde cero y uno que se recoge en el nivel 40 se leían igual en el mensaje aunque
+  cuesten la mitad el uno del otro.
 
 ### Corregido
 
