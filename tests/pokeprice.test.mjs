@@ -643,9 +643,11 @@ await app.send('Page.navigate', { url: `${app.base}/apps/pokeprice/` });
 await sleep(1300);
 const junk = await app.evalJs(`return { name: document.getElementById('boldName').checked,
   price: document.getElementById('boldPrice').checked,
-  total: document.getElementById('boldTotal').checked };`);
+  total: document.getElementById('boldTotal').checked,
+  deposit: document.getElementById('boldDeposit').checked };`);
 check('solo se recupera lo que sea sí o no: el resto vuelve a su valor de fábrica',
-  junk.name === true && junk.price === false && junk.total === true, JSON.stringify(junk));
+  junk.name === true && junk.price === false && junk.total === true && junk.deposit === true,
+  JSON.stringify(junk));
 
 await app.evalJs(`const c = document.getElementById('boldPrice'); c.checked = true;
   c.dispatchEvent(new Event('change', { bubbles: true })); return 1;`);
@@ -700,6 +702,66 @@ await app.evalJs(`for (const id of ['boldName', 'boldTotal']) {
 await sleep(200);
 check('volver a marcarlas las devuelve al mensaje',
   /\*Garchomp\*/.test(await app.evalJs("return document.getElementById('quoteText').value;")));
+
+// El adelanto es lo que el cliente paga hoy: tiene su propia negrita.
+await setVal('#orderDeposit', '50');
+await sleep(250);
+const dep = await app.evalJs("return document.getElementById('quoteText').value;");
+check('el adelanto sale en negrita y el resto a entregar no',
+  /^Adelanto 50%: \*[^*]+\* · el resto al entregar: [^*]+$/m.test(dep),
+  dep.split('\n').find(l => /Adelanto/.test(l)) || dep.slice(-160));
+
+await app.evalJs(`const c = document.getElementById('boldDeposit'); c.checked = false;
+  c.dispatchEvent(new Event('change', { bubbles: true })); return 1;`);
+await sleep(200);
+check('y se puede apagar como las demás',
+  /^Adelanto 50%: [^*]+$/m.test(await app.evalJs("return document.getElementById('quoteText').value;")),
+  await app.evalJs("return document.getElementById('quoteText').value;"));
+
+// Un asterisco escrito a mano en el nombre partiría la negrita en dos: el
+// mensaje lo suelta, aunque en la pantalla se siga viendo como se escribió.
+await app.clickReal('#tabTrain');
+await sleep(200);
+await setVal('#trSpecies', 'Gar*chomp');
+await setVal('#trFrom', '1');
+await setVal('#trQty', '1');
+await sleep(250);
+await app.clickReal('#trAdd');
+await sleep(250);
+await app.clickReal('#tabOrder');
+await sleep(200);
+await setVal('#clientName', 'Ash*');
+await sleep(250);
+const starred = await app.evalJs(`return { quote: document.getElementById('quoteText').value,
+  screen: [...document.querySelectorAll('#orderList .item .what strong')].map(e => e.textContent).join(' | ') };`);
+check('el asterisco escrito a mano no se cuela en el mensaje',
+  /• \*Garchomp\* — entrenar del 1 al 100/.test(starred.quote)
+  && /para Ash$/m.test(starred.quote) && !/Gar\*chomp|Ash\*/.test(starred.quote),
+  starred.quote.slice(0, 240));
+check('pero en la pantalla el nombre se sigue viendo tal cual se escribió',
+  /Gar\*chomp/.test(starred.screen), starred.screen);
+
+// Copiar y compartir tienen que soltar exactamente el texto de la caja.
+await app.send('Browser.grantPermissions',
+  { origin: app.base, permissions: ['clipboardReadWrite', 'clipboardSanitizedWrite'] });
+await app.clickReal('#copyQuote');
+await sleep(350);
+const copied = await app.evalJs(`return { flash: document.getElementById('statusLine').textContent,
+  quote: document.getElementById('quoteText').value,
+  clip: await navigator.clipboard.readText().catch(err => 'ERROR ' + err.name) };`);
+check('copiar deja el mensaje entero, con sus negritas, en el portapapeles',
+  copied.clip === copied.quote && /\*/.test(copied.clip),
+  `${copied.flash} | ${String(copied.clip).slice(0, 120)}`);
+check('y avisa de que se copió', /copiada/i.test(copied.flash), copied.flash);
+
+const shared = await app.evalJs(`window.__shared = null;
+  navigator.share = async (data) => { window.__shared = data.text; };
+  document.getElementById('shareQuote').click();
+  await new Promise(r => setTimeout(r, 120));
+  return { shared: window.__shared, quote: document.getElementById('quoteText').value };`);
+check('compartir manda ese mismo texto al sistema',
+  shared.shared === shared.quote && /\*/.test(String(shared.shared)),
+  String(shared.shared).slice(0, 120));
 
 /* ---------------- móvil ---------------- */
 await app.send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 3, mobile: true });

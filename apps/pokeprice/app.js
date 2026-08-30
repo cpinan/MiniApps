@@ -20,7 +20,7 @@ const DEFAULT_RATES = {
 // Negritas del mensaje. WhatsApp pone en negrita lo que va entre asteriscos;
 // por defecto resalta lo que el cliente busca de un vistazo — qué Pokémon y
 // cuánto — y cada parte se puede apagar desde el pedido.
-const DEFAULT_BOLD = { name: true, price: true, total: true };
+const DEFAULT_BOLD = { name: true, price: true, total: true, deposit: true };
 
 const state = {
   tab: 'train',
@@ -378,13 +378,17 @@ function quoteText(t) {
   const client = state.order.client.trim();
   const b = state.order.bold;
   const strong = (text, on) => (on ? `*${text}*` : text);
+  // WhatsApp no tiene manera de escapar sus marcadores: un asterisco suelto
+  // dentro de un nombre escrito a mano corta la negrita a media palabra y el
+  // resto del mensaje se ve torcido. Se cae del mensaje, no de la pantalla.
+  const clean = (text) => text.replace(/\*/g, '').trim();
   const lines = [];
-  lines.push(`Cotización · servicios PokeMMO${client ? ` · para ${client}` : ''}`);
+  lines.push(`Cotización · servicios PokeMMO${client ? ` · para ${clean(client)}` : ''}`);
   lines.push(new Date().toLocaleDateString('es-PE'));
   lines.push('');
   for (const i of items) {
     // El título ya trae " · entrenamiento"/" · crianza": la línea corta lo dice mejor.
-    const name = i.title.split(' · ')[0];
+    const name = clean(i.title.split(' · ')[0]) || 'Pokémon';
     const what = i.short || i.detail;
     // La cantidad se queda fuera de los asteriscos: WhatsApp no cierra la
     // negrita si el marcador queda pegado a un espacio.
@@ -399,7 +403,10 @@ function quoteText(t) {
   }
   lines.push(strong(`TOTAL: ${money(t.total)}`, b.total));
   if (t.deposit > 0) {
-    lines.push(`Adelanto ${state.order.deposit}%: ${money(t.deposit)} · el resto al entregar: ${money(t.rest)}`);
+    // Lo que el cliente paga hoy va en negrita aparte del total: es la cifra
+    // que tiene que mirar cuando abre el mensaje.
+    lines.push(`Adelanto ${state.order.deposit}%: ${strong(money(t.deposit), b.deposit)}`
+      + ` · el resto al entregar: ${money(t.rest)}`);
   }
   return lines.join('\n');
 }
@@ -423,7 +430,8 @@ async function copyQuote() {
 const TABS = [['train', 'tabTrain', 'panelTrain'], ['breed', 'tabBreed', 'panelBreed'],
   ['order', 'tabOrder', 'panelOrder'], ['rates', 'tabRates', 'panelRates']];
 
-const BOLD_FIELDS = [['boldName', 'name'], ['boldPrice', 'price'], ['boldTotal', 'total']];
+const BOLD_FIELDS = [['boldName', 'name'], ['boldPrice', 'price'],
+  ['boldTotal', 'total'], ['boldDeposit', 'deposit']];
 
 function setTab(name) {
   state.tab = name;

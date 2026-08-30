@@ -1,6 +1,6 @@
 # STATUS — MiniApps
 
-_Última actualización: 2026-08-29 · rama `main` · 0 archivos sin commitear_
+_Última actualización: 2026-08-30 · rama `main` · 0 archivos sin commitear_
 
 ## Próxima acción
 
@@ -23,23 +23,26 @@ Construir la app de **temporizador** (`apps/timer/`) siguiendo la Fase 1 de `doc
   (`~/Library/Application Support/com.pokeemu.macos/pokemmo-client-live/roms/2.nds`, narc
   `a/0/1/6`, byte `0x15`; el sexo está en `0x12`, las evoluciones en `a/0/1/9`). Esa extracción
   corrigió trece curvas que estaban mal y cotizaban mal.
-- **El texto de la cotización es un mensaje, no una ficha técnica**: cada línea del pedido guarda
-  `detail` (técnico, para la pantalla) y `short` (para el cliente). El cliente ve
-  "• Arcanine — entrenar hasta nivel 100: $131.250"; la EXP, la curva y la tarifa se quedan en la
-  app.
+- **El texto de la cotización es un mensaje de WhatsApp, no una ficha técnica**: cada línea del
+  pedido guarda `detail` (técnico, para la pantalla) y `short` (para el cliente). El cliente ve
+  "• *Arcanine* — entrenar del 1 al 100: *$131.250*"; la EXP, la curva y la tarifa se quedan en la
+  app. El rango va siempre entero, con los dos extremos. Las negritas (asteriscos de WhatsApp)
+  son cuatro casillas en la pestaña Pedido — Pokémon, precio, total y adelanto—, encendidas de
+  fábrica y guardadas con el pedido. Un asterisco escrito a mano en el nombre o en el cliente se
+  cae del mensaje: WhatsApp no sabe escaparlo y partiría la negrita.
 - **"Entregado entrenado a 100" se cobra por experiencia**, no con tarifa plana:
   `trainedDeliveryPrice()` aplica la tarifa de entrenamiento a la curva entera. Cuesta lo mismo que
   pedir crianza y entrenamiento por separado, y eso está atado con test.
 - **Núcleo compartido** en `assets/shared/` (`base.css` + `core.js`). `pokewheel` es la única que
   no lo usa: nació antes y funciona.
-- **375 checks verdes** en siete suites (`npm test`), con chequeos de móvil obligatorios.
+- **394 checks verdes** en siete suites (`npm test`), con chequeos de móvil obligatorios.
 - **Donaciones**: `FUNDING.yml`, `DONATE.md`/`DONATE_ES.md` con QR de Yape/Plin, y botón dorado en
   el hub y en la cabecera de cada app.
 - **Plan de lo que sigue**: `docs/ROADMAP.md`. `docs/IDEAS.md` es la lluvia de ideas cruda.
 
 ## En vuelo
 
-Nada en vuelo. Árbol limpio y `4ac709d` pusheado a `main`.
+Nada en vuelo. Árbol limpio y todo pusheado a `main`.
 
 Lo siguiente, ya especificado en `docs/ROADMAP.md` §3 (Fase 1):
 
@@ -52,7 +55,7 @@ Lo siguiente, ya especificado en `docs/ROADMAP.md` §3 (Fase 1):
 ## Verificar
 
 ```bash
-tools/verify.sh          # = npm test: 7 suites, 375 checks
+tools/verify.sh          # = npm test: 7 suites, 394 checks
 python3 -m http.server 8181   # y abrir http://localhost:8181/
 ```
 
