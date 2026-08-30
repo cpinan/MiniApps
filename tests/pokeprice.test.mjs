@@ -621,6 +621,36 @@ check('un guardado de la versión vieja no revive la tarifa plana de 40.000',
   digits(await app.evalJs("return document.getElementById('tagTrained').textContent;")).startsWith('125000'),
   await app.evalJs("return document.getElementById('tagTrained').textContent;"));
 
+// Un pedido guardado antes de que existieran las negritas no trae la clave, y
+// una copia manoseada puede traer cualquier cosa: en los dos casos se arranca
+// con las tres marcadas, no con un checkbox en blanco.
+await app.evalJs(`const k = 'pokeprice.v1';
+  const c = JSON.parse(localStorage.getItem(k) || '{}');
+  c.order = { ...(c.order || {}) };
+  delete c.order.bold;
+  localStorage.setItem(k, JSON.stringify(c)); return 1;`);
+await app.send('Page.navigate', { url: `${app.base}/apps/pokeprice/` });
+await sleep(1300);
+check('un pedido guardado sin negritas arranca con las tres puestas',
+  await app.evalJs(`return ['boldName', 'boldPrice', 'boldTotal']
+    .every(id => document.getElementById(id).checked);`));
+
+await app.evalJs(`const k = 'pokeprice.v1';
+  const c = JSON.parse(localStorage.getItem(k) || '{}');
+  c.order = { ...(c.order || {}), bold: { name: 'sí', price: false, total: 0 } };
+  localStorage.setItem(k, JSON.stringify(c)); return 1;`);
+await app.send('Page.navigate', { url: `${app.base}/apps/pokeprice/` });
+await sleep(1300);
+const junk = await app.evalJs(`return { name: document.getElementById('boldName').checked,
+  price: document.getElementById('boldPrice').checked,
+  total: document.getElementById('boldTotal').checked };`);
+check('solo se recupera lo que sea sí o no: el resto vuelve a su valor de fábrica',
+  junk.name === true && junk.price === false && junk.total === true, JSON.stringify(junk));
+
+await app.evalJs(`const c = document.getElementById('boldPrice'); c.checked = true;
+  c.dispatchEvent(new Event('change', { bubbles: true })); return 1;`);
+await sleep(150);
+
 /* --- el mensaje que se le pega al cliente --- */
 await app.clickReal('#tabTrain');
 await sleep(200);
