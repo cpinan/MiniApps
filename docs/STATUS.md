@@ -1,6 +1,6 @@
 # STATUS — MiniApps
 
-_Última actualización: 2026-08-29 · rama `main` · 0 archivos sin commitear_
+_Última actualización: 2026-08-30 · rama `main` · 0 archivos sin commitear_
 
 ## Próxima acción
 
@@ -15,8 +15,11 @@ Construir la app de **temporizador** (`apps/timer/`) siguiendo la Fase 1 de `doc
 - **`apps/pokeprice/` (💰 Cotizador PokeMMO)**: precio de entrenamiento por experiencia hasta nivel
   100 y de crianza 2×31, con tarifas editables, pedido de varias líneas y texto de cotización para
   el cliente. La lógica pura vive en `apps/pokeprice/exp.js` (seis curvas de experiencia de gen
-  3+, precios y 169 especies) y los 91 checks en `tests/pokeprice.test.mjs`. La curva va amarrada a
+  3+, precios y 169 especies) y los 93 checks en `tests/pokeprice.test.mjs`. La curva va amarrada a
   la especie y se nombra por su experiencia total al nivel 100, que es como la reconoce el jugador.
+  El tope del servicio es el **nivel 100** y vive en una sola constante, `SERVICE_CAP` en
+  `exp.js`: la pantalla lo escribe desde ahí (`[data-cap]` + `fillStatic`), no hay ningún número
+  a mano en el HTML.
 - **Núcleo compartido** en `assets/shared/` (`base.css` + `core.js`): temas, parseo de listas,
   azar sin sesgo, confeti, sonido y arranque PWA. `pokewheel` es la única que no lo usa: tiene su
   propio CSS/JS porque nació antes y funciona; migrarla no es urgente.
@@ -34,9 +37,10 @@ Construir la app de **temporizador** (`apps/timer/`) siguiendo la Fase 1 de `doc
 
 ## En vuelo
 
-Nada en vuelo. El árbol está limpio, todo está pusheado y `v1.3.0` está desplegado y comprobado
-en producción con un navegador de verdad (sin errores de consola, buscador filtrando, curva
-bloqueada, precio correcto).
+Nada en vuelo. El árbol está limpio y `b9b4314` (tope del cotizador a nivel 100) está pusheado a
+`main`; el build de Pages salió `built` para ese commit el 2026-08-30 00:16 UTC. **Sin tag**: el
+último tag sigue siendo `v1.3.0`, así que ese cambio está en producción pero sin versión propia
+— crear `v1.3.1` si se quiere cerrar el ciclo.
 
 Lo siguiente, ya especificado en `docs/ROADMAP.md` §3 (Fase 1):
 
@@ -90,3 +94,7 @@ python3 -m http.server 8181   # y abrir http://localhost:8181/
   borde de arriba, que es donde está la cabecera sticky de todas las apps — cuenta como visible y
   el clic se lo come la cabecera. `clickReal` comprueba con `elementFromPoint` que el punto es del
   elemento y, si está tapado, lo centra y vuelve a mirar.
+- **Comprobar producción con `curl` desde la sesión de Claude no funciona**: las salidas a
+  `cpinan.github.io` devuelven código 000 (bloqueadas), aunque `gh api` sí responde. Para saber si
+  un despliegue salió, usar `gh api repos/cpinan/MiniApps/pages/builds/latest`, no `curl` a la
+  página; y para ver la app de verdad, servirla en local.
