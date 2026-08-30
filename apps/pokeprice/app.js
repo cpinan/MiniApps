@@ -20,7 +20,7 @@ const DEFAULT_RATES = {
 // Negritas del mensaje. WhatsApp pone en negrita lo que va entre asteriscos;
 // por defecto resalta lo que el cliente busca de un vistazo — qué Pokémon y
 // cuánto — y cada parte se puede apagar desde el pedido.
-const DEFAULT_BOLD = { name: true, price: true, total: true, deposit: true };
+const DEFAULT_BOLD = { name: true, price: true, total: true, deposit: true, discount: true };
 
 const state = {
   tab: 'train',
@@ -398,8 +398,11 @@ function quoteText(t) {
   }
   lines.push('');
   if (t.discount > 0) {
+    // El subtotal es de dónde viene el número; lo que se resalta es la rebaja,
+    // que es la parte que el cliente agradece.
     lines.push(`Subtotal: ${money(t.subtotal)}`);
-    lines.push(`Descuento ${state.order.discount}%: −${money(t.discount)}`);
+    lines.push(`Descuento ${state.order.discount}%: `
+      + strong(`−${money(t.discount)}`, b.discount));
   }
   lines.push(strong(`TOTAL: ${money(t.total)}`, b.total));
   if (t.deposit > 0) {
@@ -430,8 +433,8 @@ async function copyQuote() {
 const TABS = [['train', 'tabTrain', 'panelTrain'], ['breed', 'tabBreed', 'panelBreed'],
   ['order', 'tabOrder', 'panelOrder'], ['rates', 'tabRates', 'panelRates']];
 
-const BOLD_FIELDS = [['boldName', 'name'], ['boldPrice', 'price'],
-  ['boldTotal', 'total'], ['boldDeposit', 'deposit']];
+const BOLD_FIELDS = [['boldName', 'name'], ['boldPrice', 'price'], ['boldTotal', 'total'],
+  ['boldDeposit', 'deposit'], ['boldDiscount', 'discount']];
 
 function setTab(name) {
   state.tab = name;

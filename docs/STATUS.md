@@ -27,15 +27,16 @@ Construir la app de **temporizador** (`apps/timer/`) siguiendo la Fase 1 de `doc
   pedido guarda `detail` (técnico, para la pantalla) y `short` (para el cliente). El cliente ve
   "• *Arcanine* — entrenar del 1 al 100: *$131.250*"; la EXP, la curva y la tarifa se quedan en la
   app. El rango va siempre entero, con los dos extremos. Las negritas (asteriscos de WhatsApp)
-  son cuatro casillas en la pestaña Pedido — Pokémon, precio, total y adelanto—, encendidas de
-  fábrica y guardadas con el pedido. Un asterisco escrito a mano en el nombre o en el cliente se
+  son cinco casillas en la pestaña Pedido — Pokémon, precio, total, adelanto y descuento—,
+  encendidas de fábrica y guardadas con el pedido. El subtotal se queda siempre en plano: lo que
+  se resalta es la rebaja. Un asterisco escrito a mano en el nombre o en el cliente se
   cae del mensaje: WhatsApp no sabe escaparlo y partiría la negrita.
 - **"Entregado entrenado a 100" se cobra por experiencia**, no con tarifa plana:
   `trainedDeliveryPrice()` aplica la tarifa de entrenamiento a la curva entera. Cuesta lo mismo que
   pedir crianza y entrenamiento por separado, y eso está atado con test.
 - **Núcleo compartido** en `assets/shared/` (`base.css` + `core.js`). `pokewheel` es la única que
   no lo usa: nació antes y funciona.
-- **394 checks verdes** en siete suites (`npm test`), con chequeos de móvil obligatorios.
+- **396 checks verdes** en siete suites (`npm test`), con chequeos de móvil obligatorios.
 - **Donaciones**: `FUNDING.yml`, `DONATE.md`/`DONATE_ES.md` con QR de Yape/Plin, y botón dorado en
   el hub y en la cabecera de cada app.
 - **Plan de lo que sigue**: `docs/ROADMAP.md`. `docs/IDEAS.md` es la lluvia de ideas cruda.
@@ -55,7 +56,7 @@ Lo siguiente, ya especificado en `docs/ROADMAP.md` §3 (Fase 1):
 ## Verificar
 
 ```bash
-tools/verify.sh          # = npm test: 7 suites, 394 checks
+tools/verify.sh          # = npm test: 7 suites, 396 checks
 python3 -m http.server 8181   # y abrir http://localhost:8181/
 ```
 

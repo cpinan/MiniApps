@@ -644,10 +644,11 @@ await sleep(1300);
 const junk = await app.evalJs(`return { name: document.getElementById('boldName').checked,
   price: document.getElementById('boldPrice').checked,
   total: document.getElementById('boldTotal').checked,
-  deposit: document.getElementById('boldDeposit').checked };`);
+  deposit: document.getElementById('boldDeposit').checked,
+  discount: document.getElementById('boldDiscount').checked };`);
 check('solo se recupera lo que sea sí o no: el resto vuelve a su valor de fábrica',
-  junk.name === true && junk.price === false && junk.total === true && junk.deposit === true,
-  JSON.stringify(junk));
+  junk.name === true && junk.price === false && junk.total === true && junk.deposit === true
+  && junk.discount === true, JSON.stringify(junk));
 
 await app.evalJs(`const c = document.getElementById('boldPrice'); c.checked = true;
   c.dispatchEvent(new Event('change', { bubbles: true })); return 1;`);
@@ -717,6 +718,23 @@ await sleep(200);
 check('y se puede apagar como las demás',
   /^Adelanto 50%: [^*]+$/m.test(await app.evalJs("return document.getElementById('quoteText').value;")),
   await app.evalJs("return document.getElementById('quoteText').value;"));
+
+// La rebaja es lo que el cliente agradece; el subtotal solo dice de dónde sale.
+await setVal('#orderDiscount', '10');
+await sleep(250);
+const disc2 = await app.evalJs("return document.getElementById('quoteText').value;");
+check('el descuento sale en negrita y el subtotal se queda en plano',
+  /^Descuento 10%: \*−[^*]+\*$/m.test(disc2) && /^Subtotal: [^*]+$/m.test(disc2),
+  disc2.split('\n').filter(l => /Subtotal|Descuento/.test(l)).join(' | ') || disc2.slice(-200));
+
+await app.evalJs(`const c = document.getElementById('boldDiscount'); c.checked = false;
+  c.dispatchEvent(new Event('change', { bubbles: true })); return 1;`);
+await sleep(200);
+check('y también se puede apagar',
+  /^Descuento 10%: −[^*]+$/m.test(await app.evalJs("return document.getElementById('quoteText').value;")),
+  await app.evalJs("return document.getElementById('quoteText').value;"));
+await setVal('#orderDiscount', '0');
+await sleep(200);
 
 // Un asterisco escrito a mano en el nombre partiría la negrita en dos: el
 // mensaje lo suelta, aunque en la pantalla se siga viendo como se escribió.
