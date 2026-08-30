@@ -106,6 +106,16 @@ export function levelForBudget(group, currentExp, budget, tariff, cap = SERVICE_
   return best;
 }
 
+/**
+ * Entregar la cría ya entrenada al tope. Un Pokémon recién criado nace en el
+ * nivel 1 con 0 de experiencia, así que lo que se cobra es la curva ENTERA de su
+ * especie con la misma tarifa que el entrenamiento suelto: un Lento (1.250.000)
+ * cuesta el doble que un Errático (600.000). No es una tarifa plana.
+ */
+export function trainedDeliveryPrice(group, tariff, cap = SERVICE_CAP) {
+  return trainingPrice(totalExp(group, cap), tariff).price;
+}
+
 /** Crianza: base 2×31 + recargo de especie + extras, por cantidad. */
 export function breedingPrice({ base = 0, surcharge = 0, extras = [], qty = 1 } = {}) {
   const unit = Math.max(0, Math.round(

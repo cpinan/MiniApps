@@ -2,24 +2,28 @@
 import { $, storage, applyTheme, initShell, THEMES, escapeHtml } from '../../assets/shared/core.js';
 import {
   GROUPS, GROUP_LABELS, GROUP_TOTALS, SERVICE_CAP, TIER_LABELS,
-  totalExp, levelFromExp, trainingPrice, levelForBudget, breedingPrice, orderTotal,
+  totalExp, levelFromExp, trainingPrice, levelForBudget, trainedDeliveryPrice,
+  breedingPrice, orderTotal,
   findSpecies, searchSpecies,
 } from './exp.js';
 
-const BUILD = '2026-08-29.2';
+const BUILD = '2026-08-29.3';
 const store = storage('pokeprice.v1');
 
 const DEFAULT_RATES = {
   currency: '$',
   pricePer: 5000, expPer: 50000, rounding: 'bloque', min: 0,
   breedBase: 150000, tierComun: 0, tierRaro: 50000, tierSin: 80000,
-  nature: 20000, gender: 15000, move: 15000, iv: 60000, trained: 40000,
+  nature: 20000, gender: 15000, move: 15000, iv: 60000,
 };
 
 const state = {
   tab: 'train',
   train: { species: '', group: 'medio_lento', fromMode: 'nivel', from: 1, to: SERVICE_CAP, qty: 1, budget: '' },
-  breed: { species: '', surcharge: 0, nature: false, gender: false, trained: false, moves: 0, ivs: 0, qty: 1 },
+  breed: {
+    species: '', group: 'medio_lento', surcharge: 0,
+    nature: false, gender: false, trained: false, moves: 0, ivs: 0, qty: 1,
+  },
   order: { client: '', items: [], discount: 0, deposit: 0 },
   rates: { ...DEFAULT_RATES },
 };
@@ -46,7 +50,7 @@ const RATE_FIELDS = [
   ['rtPricePer', 'pricePer'], ['rtExpPer', 'expPer'], ['rtMin', 'min'],
   ['rtBreedBase', 'breedBase'], ['rtTierComun', 'tierComun'], ['rtTierRaro', 'tierRaro'],
   ['rtTierSin', 'tierSin'], ['rtNature', 'nature'], ['rtGender', 'gender'],
-  ['rtMove', 'move'], ['rtIv', 'iv'], ['rtTrained', 'trained'],
+  ['rtMove', 'move'], ['rtIv', 'iv'],
 ];
 
 const tariff = () => ({
@@ -169,24 +173,25 @@ function trainInput() {
 /**
  * La curva es un dato de la especie, no una opción: si el Pokémon está en la
  * tabla manda él y el desplegable queda bloqueado. Solo se elige a mano cuando
- * la especie no está (o no se ha escrito ninguna).
+ * la especie no está (o no se ha escrito ninguna). Vale para las dos pestañas:
+ * en crianza la curva decide lo que cuesta entregarlo entrenado.
  */
-function lockCurveToSpecies() {
-  const sp = findSpecies(state.train.species);
-  if (sp) state.train.group = sp.group;
-  $('trGroup').value = state.train.group;
-  $('trGroup').disabled = !!sp;
-  $('trCurveNote').textContent = sp
+function lockCurveToSpecies(slice, selectId, noteId) {
+  const sp = findSpecies(slice.species);
+  if (sp) slice.group = sp.group;
+  $(selectId).value = slice.group;
+  $(selectId).disabled = !!sp;
+  $(noteId).textContent = sp
     ? `Curva de ${sp.name}: ${curveName(sp.group)} al nivel 100. Viene con la especie.`
-    : state.train.species.trim()
-      ? `"${state.train.species.trim()}" no está en la tabla: elige tú la curva.`
+    : slice.species.trim()
+      ? `"${slice.species.trim()}" no está en la tabla: elige tú la curva.`
       : 'Sin especie: elige la curva a mano, o escribe el Pokémon y se pone sola.';
   return sp;
 }
 
 function renderTrain() {
   const t = state.train;
-  lockCurveToSpecies();
+  lockCurveToSpecies(state.train, 'trGroup', 'trCurveNote');
   const { group, currentExp, fromLevel, to, targetExp, exp } = trainInput();
   const { blocks, charged, price } = trainingPrice(exp, tariff());
   const qty = clamp(Math.floor(t.qty), 1, 99);
@@ -252,28 +257,32 @@ function addTraining() {
 
 function breedInput() {
   const b = state.breed;
+  // La cría sale del huevo en el nivel 1: entregarla entrenada cuesta la curva
+  // entera de su especie, con la tarifa de entrenamiento. No hay precio plano.
+  const curveExp = totalExp(b.group, SERVICE_CAP);
+  const trained = trainedDeliveryPrice(b.group, tariff());
   const extras = [];
   if (b.nature) extras.push({ label: 'naturaleza', amount: state.rates.nature });
   if (b.gender) extras.push({ label: 'sexo', amount: state.rates.gender });
-  if (b.trained) extras.push({ label: `entrenado a ${SERVICE_CAP}`, amount: state.rates.trained });
+  if (b.trained) extras.push({ label: `entrenado a ${SERVICE_CAP} · ${n0(curveExp)} EXP`, amount: trained });
   const moves = clamp(Math.floor(b.moves), 0, 4);
   const ivs = clamp(Math.floor(b.ivs), 0, 4);
   if (moves > 0) extras.push({ label: `${moves} mov. huevo`, amount: state.rates.move * moves });
   if (ivs > 0) extras.push({ label: `${ivs} IV extra`, amount: state.rates.iv * ivs });
   const qty = clamp(Math.floor(b.qty), 1, 99);
   const q = breedingPrice({ base: state.rates.breedBase, surcharge: b.surcharge, extras, qty });
-  return { extras, moves, ivs, qty, ...q };
+  return { extras, moves, ivs, qty, trained, curveExp, ...q };
 }
 
 function renderBreed() {
   const b = state.breed;
-  const { extras, moves, ivs, qty, unit, price } = breedInput();
+  const sp = lockCurveToSpecies(state.breed, 'brGroup', 'brCurveNote');
+  const { extras, moves, ivs, qty, unit, price, trained } = breedInput();
   $('leadBreed').textContent = money(state.rates.breedBase);
   $('tagNature').textContent = `+${money(state.rates.nature)}`;
   $('tagGender').textContent = `+${money(state.rates.gender)}`;
-  $('tagTrained').textContent = `+${money(state.rates.trained)}`;
+  $('tagTrained').textContent = `+${money(trained)}`;
 
-  const sp = findSpecies(b.species);
   $('brTierNote').textContent = sp
     ? `${sp.name}: ${TIER_LABELS[sp.tier]} → recargo sugerido ${money(tierAmount(sp.tier))}. Puedes cambiarlo a mano.`
     : 'El recargo se rellena solo según la dificultad que tenga la especie en Tarifas; puedes cambiarlo a mano.';
@@ -298,7 +307,7 @@ function addBreeding() {
   if (state.breed.gender) bits.push('sexo');
   if (moves) bits.push(`${moves} mov. huevo`);
   if (ivs) bits.push(`${ivs} IV extra`);
-  if (state.breed.trained) bits.push(`entrenado a ${SERVICE_CAP}`);
+  if (state.breed.trained) bits.push(`entrenado a ${SERVICE_CAP} (${n0(totalExp(state.breed.group, SERVICE_CAP))} EXP)`);
   state.order.items.push({
     id: nextId++, kind: 'breed', title: `${name} · crianza`,
     detail: bits.join(' · '),
@@ -408,8 +417,9 @@ function flash(msg) {
 /* ================= arranque de los controles ================= */
 
 function fillStatic() {
-  $('trGroup').innerHTML = GROUPS
-    .map(g => `<option value="${g}">${curveName(g)}</option>`).join('');
+  const curveOptions = GROUPS.map(g => `<option value="${g}">${curveName(g)}</option>`).join('');
+  $('trGroup').innerHTML = curveOptions;
+  $('brGroup').innerHTML = curveOptions;
   // El tope del servicio se escribe una sola vez, en exp.js: de ahí salen tanto el
   // texto de la pantalla como los límites de los campos de nivel.
   for (const el of document.querySelectorAll('[data-cap]')) el.textContent = String(SERVICE_CAP);
@@ -453,6 +463,9 @@ function bind() {
   };
   $('brSpecies').addEventListener('input', onBreedSpeciesTyped);
   initCombo('brSpecies', 'brSpeciesList', onBreedSpeciesTyped);
+  $('brGroup').addEventListener('change', () => {
+    state.breed.group = $('brGroup').value; save(); renderBreed();
+  });
   $('brSurcharge').addEventListener('input', () => { state.breed.surcharge = Math.max(0, num('brSurcharge')); save(); renderBreed(); });
   for (const [id, key] of [['brNature', 'nature'], ['brGender', 'gender'], ['brTrained', 'trained']]) {
     $(id).addEventListener('change', () => { state.breed[key] = $(id).checked; save(); renderBreed(); });
@@ -505,7 +518,11 @@ function save() {
 function restore() {
   const c = store.read();
   if (!c) return;
-  if (c.rates) state.rates = { ...DEFAULT_RATES, ...c.rates };
+  // Solo se recuperan las tarifas que siguen existiendo: así una copia vieja no
+  // revive un campo que ya no se cobra (p. ej. el precio plano de "entrenado").
+  if (c.rates) for (const k of Object.keys(DEFAULT_RATES)) {
+    if (c.rates[k] !== undefined) state.rates[k] = c.rates[k];
+  }
   if (c.train) Object.assign(state.train, c.train);
   if (c.breed) Object.assign(state.breed, c.breed);
   if (c.order) {
@@ -514,6 +531,7 @@ function restore() {
     nextId = state.order.items.reduce((m, i) => Math.max(m, Number(i.id) || 0), 0) + 1;
   }
   if (!GROUPS.includes(state.train.group)) state.train.group = 'medio_lento';
+  if (!GROUPS.includes(state.breed.group)) state.breed.group = 'medio_lento';
   if (TABS.some(([k]) => k === c.tab)) state.tab = c.tab;
   if (THEMES.includes(c.theme)) applyTheme(c.theme);
 }
@@ -527,6 +545,7 @@ function stateToForm() {
   $('trQty').value = state.train.qty;
   $('trBudget').value = state.train.budget;
   $('brSpecies').value = state.breed.species;
+  $('brGroup').value = state.breed.group;
   $('brSurcharge').value = state.breed.surcharge;
   $('brNature').checked = state.breed.nature;
   $('brGender').checked = state.breed.gender;

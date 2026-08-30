@@ -3,7 +3,7 @@ import { launch, reporter, sleep } from './lib/cdp.mjs';
 import {
   GROUPS, GROUP_TOTALS, SERVICE_CAP, SPECIES, TIERS, MAX_LEVEL,
   totalExp, expBetween, levelFromExp, trainingPrice, levelForBudget,
-  breedingPrice, orderTotal, findSpecies,
+  trainedDeliveryPrice, breedingPrice, orderTotal, findSpecies,
 } from '../apps/pokeprice/exp.js';
 
 const ROOT = new URL('..', import.meta.url).pathname;
@@ -92,6 +92,50 @@ check('la crianza multiplica por cantidad',
   breedingPrice({ base: 100000, qty: 3 }).price === 300000);
 check('los extras aceptan {label, amount}',
   breedingPrice({ base: 0, extras: [{ label: 'x', amount: 7000 }] }).price === 7000);
+
+// Entregar la cría entrenada no es una tarifa plana: nace en el nivel 1, así que
+// se cobra la curva entera de su especie.
+check('entregarla entrenada cobra la curva entera, no un precio fijo',
+  trainedDeliveryPrice('lento', T) === trainingPrice(totalExp('lento', SERVICE_CAP), T).price
+  && trainedDeliveryPrice('lento', T) === 125000, String(trainedDeliveryPrice('lento', T)));
+check('y cada curva cuesta lo suyo',
+  trainedDeliveryPrice('erratico', T) === 60000
+  && trainedDeliveryPrice('medio_lento', T) === 110000
+  && trainedDeliveryPrice('fluctuante', T) === 165000,
+  JSON.stringify(GROUPS.map(g => [g, trainedDeliveryPrice(g, T)])));
+check('la curva lenta cuesta más que la errática al entregarla entrenada',
+  trainedDeliveryPrice('lento', T) > trainedDeliveryPrice('erratico', T));
+check('sube con la tarifa de entrenamiento',
+  trainedDeliveryPrice('lento', { ...T, pricePer: 9000 }) === 225000,
+  String(trainedDeliveryPrice('lento', { ...T, pricePer: 9000 })));
+
+// Cobrar la crianza entrenada y cobrar la crianza y el entrenamiento por
+// separado tiene que dar lo mismo, o el cliente elige por dónde le sale barato.
+const badPair = GROUPS.filter(g =>
+  trainedDeliveryPrice(g, T) !== trainingPrice(expBetween(g, 1, SERVICE_CAP), T).price);
+check('cuesta igual que pedir la crianza y el entrenamiento 1 → 100 por separado',
+  badPair.length === 0, badPair.join(', '));
+check('las curvas caras se cobran más caras', (() => {
+  const p = GROUPS.map(g => trainedDeliveryPrice(g, T));
+  return p.every((v, i) => i === 0 || p[i - 1] < v);
+})(), JSON.stringify(GROUPS.map(g => trainedDeliveryPrice(g, T))));
+check('el redondeo proporcional también manda aquí',
+  trainedDeliveryPrice('medio_lento', { ...T, rounding: 'exacto' }) === 105986,
+  String(trainedDeliveryPrice('medio_lento', { ...T, rounding: 'exacto' })));
+check('el mínimo por Pokémon se respeta al entregarlo entrenado',
+  trainedDeliveryPrice('erratico', { ...T, min: 200000 }) === 200000);
+check('si el tope del servicio bajara, bajaría el precio', (() => {
+  const half = trainedDeliveryPrice('lento', T, 50);
+  return half === trainingPrice(totalExp('lento', 50), T).price && half < trainedDeliveryPrice('lento', T);
+})(), String(trainedDeliveryPrice('lento', T, 50)));
+
+// El extra entra en el unitario, así que la cantidad lo multiplica como al resto.
+const bt = breedingPrice({
+  base: 150000, surcharge: 80000,
+  extras: [{ label: 'entrenado a 100', amount: trainedDeliveryPrice('lento', T) }], qty: 2,
+});
+check('dos crías entrenadas cobran el doble del unitario, curva incluida',
+  bt.unit === 355000 && bt.price === 710000, JSON.stringify(bt));
 
 const ORDER = [{ price: 100000 }, { price: 50000 }];
 const t1 = orderTotal(ORDER, { discountPct: 10, depositPct: 50 });
@@ -344,6 +388,89 @@ await sleep(200);
 check('cada movimiento huevo suma',
   digits(await app.evalJs("return document.querySelector('#brResult .price').textContent;")).startsWith('280000'));
 
+// El extra "entregado entrenado" sale de la EXP total de la curva, no de una
+// tarifa plana: Metagross es Lento (1.250.000) y con 5.000/50.000 son 125.000.
+await app.evalJs(`const c = document.getElementById('brTrained'); c.checked = true;
+  c.dispatchEvent(new Event('change', { bubbles: true })); return 1;`);
+await sleep(200);
+const tr1 = await app.evalJs(`return { price: document.querySelector('#brResult .price').textContent,
+  tag: document.getElementById('tagTrained').textContent,
+  group: document.getElementById('brGroup').value,
+  locked: document.getElementById('brGroup').disabled,
+  rows: [...document.querySelectorAll('#brResult .breakdown div')].map(d => d.textContent) };`);
+check('la crianza también amarra la curva a la especie',
+  tr1.group === 'lento' && tr1.locked === true, JSON.stringify(tr1));
+check('entregarlo entrenado a 100 cobra la curva entera de la especie',
+  digits(tr1.tag).startsWith('125000') && digits(tr1.price).startsWith('405000'), JSON.stringify(tr1));
+check('y el desglose dice de qué experiencia sale',
+  tr1.rows.some(r => digits(r).includes('1250000')), JSON.stringify(tr1.rows));
+
+await setVal('#brSpecies', 'Milotic');
+await sleep(200);
+const tr2 = await app.evalJs(`return { tag: document.getElementById('tagTrained').textContent,
+  group: document.getElementById('brGroup').value };`);
+check('otra curva cuesta otra cosa: Milotic es Errático y son 60.000',
+  tr2.group === 'erratico' && digits(tr2.tag).startsWith('60000'), JSON.stringify(tr2));
+
+// Especie que no está en la tabla: la curva se elige a mano y el extra la sigue.
+await setVal('#brSpecies', 'Mewtwo');
+await sleep(200);
+const free = await app.evalJs(`return { locked: document.getElementById('brGroup').disabled,
+  note: document.getElementById('brCurveNote').textContent };`);
+check('una especie fuera de la tabla libera también la curva de la crianza',
+  free.locked === false && /elige/.test(free.note), JSON.stringify(free));
+
+await setVal('#brGroup', 'fluctuante', 'change');
+await sleep(200);
+const manual = await app.evalJs(`return { tag: document.getElementById('tagTrained').textContent,
+  price: document.querySelector('#brResult .price').textContent };`);
+check('con la curva elegida a mano cobra esa curva (Fluctuante: 165.000)',
+  digits(manual.tag).startsWith('165000') && digits(manual.price).startsWith('415000'),
+  JSON.stringify(manual));
+
+await setVal('#brQty', '2');
+await sleep(200);
+const two = await app.evalJs("return document.querySelector('#brResult .price').textContent;");
+check('la cantidad multiplica el entrenado igual que el resto',
+  digits(two).startsWith('830000') && digits(two).includes('415000'), two);
+await setVal('#brQty', '1');
+await sleep(150);
+
+await setVal('#brSpecies', 'Metagross');
+await sleep(200);
+check('volver a una especie conocida vuelve a amarrar la curva de la crianza',
+  await app.evalJs("return document.getElementById('brGroup').value === 'lento' && document.getElementById('brGroup').disabled;"));
+
+// La línea del pedido tiene que explicar de dónde sale el precio.
+await app.clickReal('#brAdd');
+await sleep(250);
+const withTrained = await app.evalJs(`const last = document.querySelector('#orderList .item:last-child');
+  return { count: document.getElementById('orderCount').textContent,
+    detail: last?.querySelector('.what span')?.textContent,
+    amount: last?.querySelector('.money')?.textContent,
+    quote: document.getElementById('quoteText').value };`);
+check('la crianza entrenada entra al pedido por 405.000',
+  withTrained.count === '2' && digits(withTrained.amount).startsWith('405000'), JSON.stringify(withTrained));
+// El separador de miles depende del locale del navegador: se compara por dígitos.
+check('y la línea dice de qué experiencia sale',
+  /entrenado a 100 \(/.test(withTrained.detail || '')
+  && digits(withTrained.detail).includes('1250000'), withTrained.detail);
+const quoteLine = withTrained.quote.split('\n').find(l => /entrenado a 100/.test(l)) || '';
+check('el texto de la cotización lo repite tal cual',
+  digits(quoteLine).includes('1250000'), quoteLine || withTrained.quote.slice(0, 200));
+
+await app.evalJs("document.querySelector('#orderList .item:last-child [data-del]').click(); return 1;");
+await sleep(250);
+check('quitarla deja el pedido como estaba',
+  await app.evalJs("return document.getElementById('orderCount').textContent === '1';"));
+
+await app.evalJs(`const c = document.getElementById('brTrained'); c.checked = false;
+  c.dispatchEvent(new Event('change', { bubbles: true })); return 1;`);
+await sleep(200);
+check('desmarcarlo lo quita del precio',
+  digits(await app.evalJs("return document.querySelector('#brResult .price').textContent;")).startsWith('280000'),
+  await app.evalJs("return document.querySelector('#brResult .price').textContent;"));
+
 await app.clickReal('#brAdd');
 await sleep(250);
 check('la crianza también entra al pedido',
@@ -382,6 +509,8 @@ check('se puede quitar una línea del pedido',
 /* --- tarifas --- */
 await app.clickReal('#tabRates');
 await sleep(200);
+check('ya no hay tarifa plana de "entregado entrenado"',
+  await app.evalJs("return document.getElementById('rtTrained') === null;"));
 await setVal('#rtPricePer', '9000');
 await sleep(200);
 await app.clickReal('#tabTrain');
@@ -389,6 +518,12 @@ await sleep(200);
 check('cambiar la tarifa recalcula el precio al vuelo',
   digits(await app.evalJs("return document.querySelector('#trResult .price').textContent;")).startsWith('225000'),
   await app.evalJs("return document.querySelector('#trResult .price').textContent;"));
+
+await app.clickReal('#tabBreed');
+await sleep(200);
+check('subir la tarifa de entrenamiento sube también el entregado entrenado',
+  digits(await app.evalJs("return document.getElementById('tagTrained').textContent;")).startsWith('225000'),
+  await app.evalJs("return document.getElementById('tagTrained').textContent;"));
 
 await app.clickReal('#tabRates');
 await sleep(150);
@@ -410,12 +545,31 @@ check('al recargar se conservan pedido, tarifas y formulario',
   kept.count === '1' && kept.price === '9000' && kept.currency === 'P$' && kept.species === 'Garchomp',
   JSON.stringify(kept));
 
+const keptBreed = await app.evalJs(`return { species: document.getElementById('brSpecies').value,
+  group: document.getElementById('brGroup').value, locked: document.getElementById('brGroup').disabled,
+  tag: document.getElementById('tagTrained').textContent };`);
+check('la crianza recuerda especie, curva y lo que cuesta entregarla entrenada',
+  keptBreed.species === 'Metagross' && keptBreed.group === 'lento' && keptBreed.locked === true
+  && digits(keptBreed.tag).startsWith('225000'), JSON.stringify(keptBreed));
+
 await app.clickReal('#tabRates');
 await sleep(150);
 await app.clickReal('#rtReset');
 await sleep(300);
 check('restablecer devuelve las tarifas de fábrica',
   await app.evalJs("return document.getElementById('rtPricePer').value === '5000' && document.getElementById('rtCurrency').value === '$';"));
+
+// La versión vieja guardaba "trained: 40000" como tarifa plana: al recuperar ese
+// guardado no puede volver a cobrarse, tiene que salir la curva de la especie.
+await app.evalJs(`const k = 'pokeprice.v1';
+  const c = JSON.parse(localStorage.getItem(k) || '{}');
+  c.rates = { ...(c.rates || {}), trained: 40000 };
+  localStorage.setItem(k, JSON.stringify(c)); return 1;`);
+await app.send('Page.navigate', { url: `${app.base}/apps/pokeprice/` });
+await sleep(1300);
+check('un guardado de la versión vieja no revive la tarifa plana de 40.000',
+  digits(await app.evalJs("return document.getElementById('tagTrained').textContent;")).startsWith('125000'),
+  await app.evalJs("return document.getElementById('tagTrained').textContent;"));
 
 /* ---------------- móvil ---------------- */
 await app.send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 3, mobile: true });

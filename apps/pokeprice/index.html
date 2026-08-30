@@ -109,6 +109,13 @@
           <ul id="brSpeciesList" class="combo-list" role="listbox" hidden></ul>
         </div>
       </div>
+      <label class="field">Curva de experiencia <span class="opt">(su EXP total a nivel 100)</span>
+        <select id="brGroup"></select>
+      </label>
+    </div>
+    <p class="hint" id="brCurveNote"></p>
+
+    <div class="grid2">
       <label class="field">Recargo por especie
         <input id="brSurcharge" type="number" inputmode="numeric" min="0" step="1000" value="0">
       </label>
@@ -224,9 +231,8 @@
           <input id="rtIv" type="number" inputmode="numeric" min="0" step="1000" value="60000">
         </label>
       </div>
-      <label class="field">Entregado entrenado a <span data-cap>100</span>
-        <input id="rtTrained" type="number" inputmode="numeric" min="0" step="1000" value="40000">
-      </label>
+      <p class="hint">Entregarlo entrenado a <span data-cap>100</span> no tiene tarifa propia: se cobra
+        la experiencia total de la curva de esa especie con la tarifa de entrenamiento de arriba.</p>
     </details>
 
     <details class="block">
