@@ -4,7 +4,7 @@ Todos los cambios relevantes de este repo. Formato basado en
 [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y
 [SemVer](https://semver.org/lang/es/).
 
-## [Sin publicar]
+## [1.4.0] — 2026-08-30
 
 ### Añadido
 
@@ -34,6 +34,19 @@ Todos los cambios relevantes de este repo. Formato basado en
   del 1 al 100", que la cría también sale del huevo en el nivel 1. Sin el punto de partida, un
   trabajo desde cero y uno que se recoge en el nivel 40 se leían igual en el mensaje aunque
   cuesten la mitad el uno del otro.
+- **💰 Cotizador PokeMMO**: **"entregado entrenado a 100" se cobra por experiencia**, no con una
+  tarifa plana. `trainedDeliveryPrice()` aplica la tarifa de entrenamiento a la curva entera de la
+  especie, así que pedir la crianza con entrega entrenada cuesta lo mismo que pedir crianza y
+  entrenamiento por separado. Antes eran 40.000 para todas las curvas: un Metagross entrenado
+  costaba lo mismo que un Blissey, que necesita la mitad de experiencia. **Sube lo que se le cobra
+  al cliente por ese extra**, así que una cotización vieja en papel ya no cuadra con la app. El
+  campo de la tarifa plana (`rates.trained`) desaparece de *Tarifas* y un guardado antiguo no
+  puede revivirlo.
+- **💰 Cotizador PokeMMO**: el tope del servicio pasa del **nivel 65 al nivel 100**. Afecta al
+  nivel objetivo del entrenamiento (por defecto y máximo), al techo de "hasta dónde le alcanza al
+  cliente", al extra de crianza "entregado entrenado a" y al texto de la cotización. El tope vive
+  en una sola constante (`SERVICE_CAP` en `apps/pokeprice/exp.js`) y la pantalla lo escribe desde
+  ahí, así que no queda ningún 65 a mano en el HTML.
 
 ### Corregido
 
@@ -41,14 +54,6 @@ Todos los cambios relevantes de este repo. Formato basado en
   mal — Ampharos, Mantine, Dusclops, Dusknoir, Electivire, Magmortar, Toxicroak, Drapion,
   Jellicent, Klinklang, Golurk, Leavanny y Scolipede. Ahora cuadran con la ROM. También se marca
   Starmie como sin género (solo cruza con Ditto).
-
-### Cambiado
-
-- **💰 Cotizador PokeMMO**: el tope del servicio pasa del **nivel 65 al nivel 100**. Afecta al
-  nivel objetivo del entrenamiento (por defecto y máximo), al techo de "hasta dónde le alcanza al
-  cliente", al extra de crianza "entregado entrenado a" y al texto de la cotización. El tope vive
-  en una sola constante (`SERVICE_CAP` en `apps/pokeprice/exp.js`) y la pantalla lo escribe desde
-  ahí, así que no queda ningún 65 a mano en el HTML.
 
 ## [1.3.0] — 2026-08-29
 
@@ -204,6 +209,8 @@ en vivo en https://cpinan.github.io/MiniApps/
   pressed y disabled, más anillo de foco para teclado.
 - La línea de ronda tiene aire por encima de la rueda.
 
+[1.4.0]: https://github.com/cpinan/MiniApps/releases/tag/v1.4.0
+[1.3.0]: https://github.com/cpinan/MiniApps/releases/tag/v1.3.0
 [1.2.1]: https://github.com/cpinan/MiniApps/releases/tag/v1.2.1
 [1.2.0]: https://github.com/cpinan/MiniApps/releases/tag/v1.2.0
 [1.1.0]: https://github.com/cpinan/MiniApps/releases/tag/v1.1.0
