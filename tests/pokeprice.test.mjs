@@ -479,9 +479,9 @@ check('la crianza entrenada entra al pedido por 405.000',
 check('y la línea dice de qué experiencia sale',
   /entrenado a 100 \(/.test(withTrained.detail || '')
   && digits(withTrained.detail).includes('1250000'), withTrained.detail);
-const quoteLine = withTrained.quote.split('\n').find(l => /entrenado a 100/.test(l)) || '';
+const quoteLine = withTrained.quote.split('\n').find(l => /entrenado del 1 al 100/.test(l)) || '';
 check('el texto del cliente lo dice en una línea y con el precio',
-  /^• Metagross — crianza .*ya entrenado a 100: /.test(quoteLine)
+  /^• \*Metagross\* — crianza .*entrenado del 1 al 100: /.test(quoteLine)
   && digits(quoteLine).includes('405000'), quoteLine || withTrained.quote.slice(0, 200));
 check('y no le suelta al cliente la experiencia ni la curva',
   !/EXP|curva/.test(withTrained.quote) && !digits(quoteLine).includes('1250000'),
@@ -519,6 +519,25 @@ check('el total suma entrenamiento y crianza',
 check('el texto de la cotización nombra los dos servicios',
   /Garchomp/.test(ord.quote) && /Metagross/.test(ord.quote) && /TOTAL/.test(ord.quote),
   ord.quote.slice(0, 120));
+
+// El mensaje va a WhatsApp: rango entero y negritas donde el cliente mira.
+const waLine = ord.quote.split('\n').find(l => /Garchomp/.test(l)) || '';
+check('el mensaje dice el rango entero, no solo el nivel de llegada',
+  /entrenar del 1 al 100/.test(waLine), waLine || ord.quote.slice(0, 200));
+check('por defecto el Pokémon y el precio van en negrita de WhatsApp',
+  /^• \*Garchomp\* — /.test(waLine) && /: \*[^*]+\*$/.test(waLine), waLine);
+check('y el total también sale en negrita', /^\*TOTAL: .+\*$/m.test(ord.quote),
+  ord.quote.slice(-140));
+
+await app.evalJs(`const c = document.getElementById('boldPrice'); c.checked = false;
+  c.dispatchEvent(new Event('change', { bubbles: true })); return 1;`);
+await sleep(200);
+const noBold = await app.evalJs("return document.getElementById('quoteText').value;");
+check('se puede apagar la negrita del precio y dejar la del nombre',
+  /\*Garchomp\*/.test(noBold) && !/: \*/.test(noBold), noBold.slice(0, 220));
+await app.evalJs(`const c = document.getElementById('boldPrice'); c.checked = true;
+  c.dispatchEvent(new Event('change', { bubbles: true })); return 1;`);
+await sleep(150);
 
 await setVal('#orderDiscount', '10');
 await sleep(200);
@@ -601,6 +620,56 @@ await sleep(1300);
 check('un guardado de la versión vieja no revive la tarifa plana de 40.000',
   digits(await app.evalJs("return document.getElementById('tagTrained').textContent;")).startsWith('125000'),
   await app.evalJs("return document.getElementById('tagTrained').textContent;"));
+
+/* --- el mensaje que se le pega al cliente --- */
+await app.clickReal('#tabTrain');
+await sleep(200);
+await setVal('#trFrom', '40');
+await setVal('#trQty', '2');
+await sleep(200);
+await app.clickReal('#trAdd');
+await sleep(250);
+await app.clickReal('#tabOrder');
+await sleep(250);
+const many = await app.evalJs("return document.getElementById('quoteText').value;");
+const manyLine = many.split('\n').filter(l => /Garchomp/.test(l)).pop() || '';
+check('el rango del mensaje respeta el nivel de partida',
+  /entrenar del 40 al 100/.test(manyLine), manyLine || many.slice(0, 200));
+// WhatsApp no cierra la negrita si el asterisco toca un espacio: el ×2 y el
+// "c/u" tienen que quedarse fuera de los marcadores.
+check('con cantidad, la negrita envuelve al Pokémon y no al ×2',
+  /^• \*Garchomp\* ×2 — /.test(manyLine), manyLine);
+check('el precio va en negrita y el "c/u" se queda fuera',
+  /: \*[^*]+\* \([^*]+ c\/u\)$/.test(manyLine), manyLine);
+
+await app.evalJs(`for (const id of ['boldName', 'boldTotal']) {
+  const c = document.getElementById(id); c.checked = false;
+  c.dispatchEvent(new Event('change', { bubbles: true }));
+} return 1;`);
+await sleep(200);
+const plain = await app.evalJs("return document.getElementById('quoteText').value;");
+check('apagar el nombre y el total les quita los asteriscos y deja los del precio',
+  !/\*Garchomp\*/.test(plain) && /^TOTAL: /m.test(plain) && /: \*/.test(plain),
+  plain.slice(0, 240));
+
+await app.send('Page.navigate', { url: `${app.base}/apps/pokeprice/` });
+await sleep(1300);
+const keptBold = await app.evalJs(`return { name: document.getElementById('boldName').checked,
+  price: document.getElementById('boldPrice').checked,
+  total: document.getElementById('boldTotal').checked,
+  quote: document.getElementById('quoteText').value };`);
+check('las negritas elegidas sobreviven a la recarga',
+  keptBold.name === false && keptBold.price === true && keptBold.total === false
+  && !/\*Garchomp\*/.test(keptBold.quote) && /: \*/.test(keptBold.quote),
+  JSON.stringify(keptBold).slice(0, 240));
+
+await app.evalJs(`for (const id of ['boldName', 'boldTotal']) {
+  const c = document.getElementById(id); c.checked = true;
+  c.dispatchEvent(new Event('change', { bubbles: true }));
+} return 1;`);
+await sleep(200);
+check('volver a marcarlas las devuelve al mensaje',
+  /\*Garchomp\*/.test(await app.evalJs("return document.getElementById('quoteText').value;")));
 
 /* ---------------- móvil ---------------- */
 await app.send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 3, mobile: true });

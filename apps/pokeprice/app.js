@@ -7,7 +7,7 @@ import {
   findSpecies, searchSpecies,
 } from './exp.js';
 
-const BUILD = '2026-08-29.3';
+const BUILD = '2026-08-30.1';
 const store = storage('pokeprice.v1');
 
 const DEFAULT_RATES = {
@@ -17,6 +17,11 @@ const DEFAULT_RATES = {
   nature: 20000, gender: 15000, move: 15000, iv: 60000,
 };
 
+// Negritas del mensaje. WhatsApp pone en negrita lo que va entre asteriscos;
+// por defecto resalta lo que el cliente busca de un vistazo — qué Pokémon y
+// cuánto — y cada parte se puede apagar desde el pedido.
+const DEFAULT_BOLD = { name: true, price: true, total: true };
+
 const state = {
   tab: 'train',
   train: { species: '', group: 'medio_lento', fromMode: 'nivel', from: 1, to: SERVICE_CAP, qty: 1, budget: '' },
@@ -24,7 +29,7 @@ const state = {
     species: '', group: 'medio_lento', surcharge: 0,
     nature: false, gender: false, trained: false, moves: 0, ivs: 0, qty: 1,
   },
-  order: { client: '', items: [], discount: 0, deposit: 0 },
+  order: { client: '', items: [], discount: 0, deposit: 0, bold: { ...DEFAULT_BOLD } },
   rates: { ...DEFAULT_RATES },
 };
 
@@ -247,7 +252,9 @@ function addTraining() {
     id: nextId++, kind: 'train', title: `${name} · entrenamiento`,
     detail: `Nv ${fromLevel} → ${to} · ${n0(exp)} EXP · curva ${curveName(group)}`,
     // `short` es lo que ve el cliente: sin EXP ni curva, que son cuenta nuestra.
-    short: fromLevel > 1 ? `entrenar del ${fromLevel} al ${to}` : `entrenar hasta nivel ${to}`,
+    // El rango va siempre entero ("del 1 al 100"): el cliente quiere saber desde
+    // dónde se empieza, y "hasta nivel 100" se leía como si ya viniera a medias.
+    short: `entrenar del ${fromLevel} al ${to}`,
     qty, unit: price, price: price * qty,
   });
   flash(`Añadido: ${name} Nv ${fromLevel} → ${to}.`);
@@ -312,7 +319,7 @@ function addBreeding() {
   const short = bits.slice();
   if (state.breed.trained) {
     bits.push(`entrenado a ${SERVICE_CAP} (${n0(totalExp(state.breed.group, SERVICE_CAP))} EXP)`);
-    short.push(`ya entrenado a ${SERVICE_CAP}`);
+    short.push(`entrenado del 1 al ${SERVICE_CAP}`);
   }
   state.order.items.push({
     id: nextId++, kind: 'breed', title: `${name} · crianza`,
@@ -369,6 +376,8 @@ function quoteText(t) {
   const items = state.order.items;
   if (!items.length) return 'Añade algo al pedido y aquí aparece el texto listo para copiar.';
   const client = state.order.client.trim();
+  const b = state.order.bold;
+  const strong = (text, on) => (on ? `*${text}*` : text);
   const lines = [];
   lines.push(`Cotización · servicios PokeMMO${client ? ` · para ${client}` : ''}`);
   lines.push(new Date().toLocaleDateString('es-PE'));
@@ -377,7 +386,10 @@ function quoteText(t) {
     // El título ya trae " · entrenamiento"/" · crianza": la línea corta lo dice mejor.
     const name = i.title.split(' · ')[0];
     const what = i.short || i.detail;
-    lines.push(`• ${name}${i.qty > 1 ? ` ×${i.qty}` : ''} — ${what}: ${money(i.price)}`
+    // La cantidad se queda fuera de los asteriscos: WhatsApp no cierra la
+    // negrita si el marcador queda pegado a un espacio.
+    lines.push(`• ${strong(name, b.name)}${i.qty > 1 ? ` ×${i.qty}` : ''} — ${what}: `
+      + strong(money(i.price), b.price)
       + (i.qty > 1 ? ` (${money(i.unit)} c/u)` : ''));
   }
   lines.push('');
@@ -385,7 +397,7 @@ function quoteText(t) {
     lines.push(`Subtotal: ${money(t.subtotal)}`);
     lines.push(`Descuento ${state.order.discount}%: −${money(t.discount)}`);
   }
-  lines.push(`TOTAL: ${money(t.total)}`);
+  lines.push(strong(`TOTAL: ${money(t.total)}`, b.total));
   if (t.deposit > 0) {
     lines.push(`Adelanto ${state.order.deposit}%: ${money(t.deposit)} · el resto al entregar: ${money(t.rest)}`);
   }
@@ -410,6 +422,8 @@ async function copyQuote() {
 
 const TABS = [['train', 'tabTrain', 'panelTrain'], ['breed', 'tabBreed', 'panelBreed'],
   ['order', 'tabOrder', 'panelOrder'], ['rates', 'tabRates', 'panelRates']];
+
+const BOLD_FIELDS = [['boldName', 'name'], ['boldPrice', 'price'], ['boldTotal', 'total']];
 
 function setTab(name) {
   state.tab = name;
@@ -496,6 +510,9 @@ function bind() {
   $('clientName').addEventListener('input', () => { state.order.client = $('clientName').value; save(); renderOrder(); });
   $('orderDiscount').addEventListener('input', () => { state.order.discount = clamp(num('orderDiscount'), 0, 100); save(); renderOrder(); });
   $('orderDeposit').addEventListener('input', () => { state.order.deposit = clamp(num('orderDeposit'), 0, 100); save(); renderOrder(); });
+  for (const [id, key] of BOLD_FIELDS) {
+    $(id).addEventListener('change', () => { state.order.bold[key] = $(id).checked; save(); renderOrder(); });
+  }
   $('copyQuote').addEventListener('click', copyQuote);
   $('shareQuote').addEventListener('click', async () => {
     const text = $('quoteText').value;
@@ -545,6 +562,10 @@ function restore() {
   if (c.order) {
     Object.assign(state.order, c.order);
     state.order.items = Array.isArray(c.order.items) ? c.order.items : [];
+    state.order.bold = { ...DEFAULT_BOLD };
+    for (const [, key] of BOLD_FIELDS) {
+      if (typeof c.order.bold?.[key] === 'boolean') state.order.bold[key] = c.order.bold[key];
+    }
     nextId = state.order.items.reduce((m, i) => Math.max(m, Number(i.id) || 0), 0) + 1;
   }
   if (!GROUPS.includes(state.train.group)) state.train.group = 'medio_lento';
@@ -573,6 +594,7 @@ function stateToForm() {
   $('clientName').value = state.order.client;
   $('orderDiscount').value = state.order.discount;
   $('orderDeposit').value = state.order.deposit;
+  for (const [id, key] of BOLD_FIELDS) $(id).checked = state.order.bold[key];
   ratesToForm();
 }
 
