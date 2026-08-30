@@ -480,8 +480,15 @@ check('y la línea dice de qué experiencia sale',
   /entrenado a 100 \(/.test(withTrained.detail || '')
   && digits(withTrained.detail).includes('1250000'), withTrained.detail);
 const quoteLine = withTrained.quote.split('\n').find(l => /entrenado a 100/.test(l)) || '';
-check('el texto de la cotización lo repite tal cual',
-  digits(quoteLine).includes('1250000'), quoteLine || withTrained.quote.slice(0, 200));
+check('el texto del cliente lo dice en una línea y con el precio',
+  /^• Metagross — crianza .*ya entrenado a 100: /.test(quoteLine)
+  && digits(quoteLine).includes('405000'), quoteLine || withTrained.quote.slice(0, 200));
+check('y no le suelta al cliente la experiencia ni la curva',
+  !/EXP|curva/.test(withTrained.quote) && !digits(quoteLine).includes('1250000'),
+  withTrained.quote.slice(0, 200));
+check('una línea de pedido es una línea de mensaje',
+  withTrained.quote.split('\n').filter(l => l.startsWith('• ')).length === 2,
+  withTrained.quote);
 
 await app.evalJs("document.querySelector('#orderList .item:last-child [data-del]').click(); return 1;");
 await sleep(250);

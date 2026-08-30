@@ -78,7 +78,10 @@ Documentación completa en [`apps/pokewheel/README.md`](apps/pokewheel/README.md
   flechas y Enter y enseña la curva junto a cada nombre. El nativo no valía — Chrome esconde las
   sugerencias cuando el input lleva `autocomplete="off"`.
 - **Pedido y cotización**: se acumulan entrenamientos y crianzas, se aplica descuento y adelanto,
-  y sale un texto plano listo para copiar o compartir con el cliente.
+  y sale un texto plano listo para copiar o compartir con el cliente. Ese texto es un mensaje de
+  WhatsApp, no una factura: una línea por servicio en palabras ("Arcanine — entrenar hasta nivel
+  100: $131,250") y el total. La experiencia, la curva y el desglose se quedan en pantalla, que es
+  donde le sirven a quien cotiza.
 - Todo vive en `localStorage`: las tarifas son tuyas y no salen del dispositivo.
 
 ## Correr en local

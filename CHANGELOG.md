@@ -16,6 +16,13 @@ Todos los cambios relevantes de este repo. Formato basado en
   exactamente los del juego. La dificultad de crianza se hereda dentro de la familia evolutiva
   (Gible es rara como Garchomp) y las especies sin género se marcan solas.
 
+### Cambiado
+
+- **💰 Cotizador PokeMMO**: el texto que se le pega al cliente pasa de tres líneas por servicio a
+  una. Se va la experiencia, el nombre de la curva y la línea de tarifa —datos de quien cotiza, no
+  del cliente— y queda "• Arcanine — entrenar hasta nivel 100: $131.250". El subtotal solo aparece
+  si hay descuento. El desglose completo sigue en pantalla, en la lista del pedido.
+
 ### Corregido
 
 - **💰 Cotizador PokeMMO**: **trece especies tenían la curva equivocada** y por tanto se cotizaban

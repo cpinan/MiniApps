@@ -246,6 +246,8 @@ function addTraining() {
   state.order.items.push({
     id: nextId++, kind: 'train', title: `${name} · entrenamiento`,
     detail: `Nv ${fromLevel} → ${to} · ${n0(exp)} EXP · curva ${curveName(group)}`,
+    // `short` es lo que ve el cliente: sin EXP ni curva, que son cuenta nuestra.
+    short: fromLevel > 1 ? `entrenar del ${fromLevel} al ${to}` : `entrenar hasta nivel ${to}`,
     qty, unit: price, price: price * qty,
   });
   flash(`Añadido: ${name} Nv ${fromLevel} → ${to}.`);
@@ -307,10 +309,15 @@ function addBreeding() {
   if (state.breed.gender) bits.push('sexo');
   if (moves) bits.push(`${moves} mov. huevo`);
   if (ivs) bits.push(`${ivs} IV extra`);
-  if (state.breed.trained) bits.push(`entrenado a ${SERVICE_CAP} (${n0(totalExp(state.breed.group, SERVICE_CAP))} EXP)`);
+  const short = bits.slice();
+  if (state.breed.trained) {
+    bits.push(`entrenado a ${SERVICE_CAP} (${n0(totalExp(state.breed.group, SERVICE_CAP))} EXP)`);
+    short.push(`ya entrenado a ${SERVICE_CAP}`);
+  }
   state.order.items.push({
     id: nextId++, kind: 'breed', title: `${name} · crianza`,
     detail: bits.join(' · '),
+    short: `crianza ${short.join(', ')}`,
     qty, unit, price,
   });
   flash(`Añadido: ${name} 2×31.`);
@@ -352,26 +359,36 @@ function renderOrder() {
   $('shareQuote').disabled = items.length === 0;
 }
 
+/**
+ * El texto que se le manda al cliente. Es un mensaje de WhatsApp, no una
+ * factura: una línea por servicio, en palabras, y el total. La experiencia, la
+ * curva y el desglose de tarifas se quedan en la pantalla, que es donde le
+ * sirven a quien cotiza; repetirlos aquí solo hacía el mensaje ilegible.
+ */
 function quoteText(t) {
   const items = state.order.items;
   if (!items.length) return 'Añade algo al pedido y aquí aparece el texto listo para copiar.';
+  const client = state.order.client.trim();
   const lines = [];
-  lines.push('COTIZACIÓN — servicios PokeMMO');
-  if (state.order.client.trim()) lines.push(`Para: ${state.order.client.trim()}`);
+  lines.push(`Cotización · servicios PokeMMO${client ? ` · para ${client}` : ''}`);
   lines.push(new Date().toLocaleDateString('es-PE'));
   lines.push('');
-  items.forEach((i, k) => {
-    lines.push(`${k + 1}. ${i.title}${i.qty > 1 ? ` ×${i.qty}` : ''}`);
-    lines.push(`   ${i.detail}`);
-    lines.push(`   ${money(i.price)}${i.qty > 1 ? ` (${money(i.unit)} c/u)` : ''}`);
-  });
+  for (const i of items) {
+    // El título ya trae " · entrenamiento"/" · crianza": la línea corta lo dice mejor.
+    const name = i.title.split(' · ')[0];
+    const what = i.short || i.detail;
+    lines.push(`• ${name}${i.qty > 1 ? ` ×${i.qty}` : ''} — ${what}: ${money(i.price)}`
+      + (i.qty > 1 ? ` (${money(i.unit)} c/u)` : ''));
+  }
   lines.push('');
-  lines.push(`Subtotal: ${money(t.subtotal)}`);
-  if (t.discount > 0) lines.push(`Descuento ${state.order.discount}%: -${money(t.discount)}`);
+  if (t.discount > 0) {
+    lines.push(`Subtotal: ${money(t.subtotal)}`);
+    lines.push(`Descuento ${state.order.discount}%: −${money(t.discount)}`);
+  }
   lines.push(`TOTAL: ${money(t.total)}`);
-  if (t.deposit > 0) lines.push(`Adelanto ${state.order.deposit}%: ${money(t.deposit)} · contra entrega ${money(t.rest)}`);
-  lines.push('');
-  lines.push(`Entrenamiento: ${money(state.rates.pricePer)} por cada ${n0(state.rates.expPer)} de experiencia, hasta nivel ${SERVICE_CAP}.`);
+  if (t.deposit > 0) {
+    lines.push(`Adelanto ${state.order.deposit}%: ${money(t.deposit)} · el resto al entregar: ${money(t.rest)}`);
+  }
   return lines.join('\n');
 }
 
