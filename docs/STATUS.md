@@ -12,35 +12,30 @@ Construir la app de **temporizador** (`apps/timer/`) siguiendo la Fase 1 de `doc
   `pokewheel` (ruleta), `teams` (equipos), `secretsanta` (amigo secreto), `typechart` (tabla de
   tipos), `bingo` (bolillero) y `pokeprice` (cotizador de PokeMMO). Cada una es PWA instalable y
   offline, con su service worker network-first, sello de build y botón "Reparar app".
-- **`apps/pokeprice/` (💰 Cotizador PokeMMO)**: precio de entrenamiento por experiencia hasta nivel
-  100 y de crianza 2×31, con tarifas editables, pedido de varias líneas y texto de cotización para
-  el cliente. La lógica pura vive en `apps/pokeprice/exp.js` (seis curvas de experiencia de gen
-  3+, precios y 169 especies) y los 93 checks en `tests/pokeprice.test.mjs`. La curva va amarrada a
-  la especie y se nombra por su experiencia total al nivel 100, que es como la reconoce el jugador.
-  El tope del servicio es el **nivel 100** y vive en una sola constante, `SERVICE_CAP` en
-  `exp.js`: la pantalla lo escribe desde ahí (`[data-cap]` + `fillStatic`), no hay ningún número
-  a mano en el HTML.
+- **`apps/pokeprice/` (💰 Cotizador PokeMMO)**: entrenamiento por experiencia hasta nivel 100 y
+  crianza 2×31, con tarifas editables, pedido de varias líneas y texto de cotización. La lógica
+  pura vive en `apps/pokeprice/exp.js` (seis curvas de gen 3+, precios y 169 especies). La curva va
+  amarrada a la especie **en las dos pestañas** y se nombra por su experiencia total al nivel 100,
+  que es como la reconoce el jugador. El tope del servicio es el **nivel 100** y vive en una sola
+  constante, `SERVICE_CAP` en `exp.js`.
+- **"Entregado entrenado a 100" se cobra por experiencia**, no con tarifa plana: la cría nace en el
+  nivel 1 con 0 EXP, así que `trainedDeliveryPrice()` aplica la tarifa de entrenamiento a la curva
+  entera (Lento 125.000 vs Errático 60.000 con 5.000/50.000). Cuesta exactamente lo mismo que pedir
+  crianza y entrenamiento por separado, y eso está atado con test.
 - **Núcleo compartido** en `assets/shared/` (`base.css` + `core.js`): temas, parseo de listas,
   azar sin sesgo, confeti, sonido y arranque PWA. `pokewheel` es la única que no lo usa: tiene su
   propio CSS/JS porque nació antes y funciona; migrarla no es urgente.
-- **341 checks verdes** en siete suites (`npm test`), con chequeos de móvil obligatorios en todas.
+- **368 checks verdes** en siete suites (`npm test`), con chequeos de móvil obligatorios en todas.
 - **El arnés de navegador es de fiar**: `tests/lib/cdp.mjs` borra el perfil de Chrome en cada
-  arranque y `clickReal` lleva el elemento a la vista y comprueba que el clic es suyo. Una suite
-  nueva puede llamar a `clickReal` sin precauciones propias.
+  arranque y `clickReal` lleva el elemento a la vista y comprueba que el clic es suyo.
 - **Donaciones**: `FUNDING.yml`, `DONATE.md`/`DONATE_ES.md` con QR de Yape/Plin, y botón dorado
-  animado arriba en el hub y en la cabecera de cada app. No hay banners ni ventanas, y las páginas
-  de donación lo prometen por escrito.
-- **Plan de lo que sigue**: `docs/ROADMAP.md`, escrito a partir de investigación de mercado
-  (categoría de pantalla de aula, sorteos en español, daily puzzles, herramientas client-side y
-  tools de PokeMMO). `docs/IDEAS.md` es la lluvia de ideas cruda.
-- Tags publicados: `v1.0.0`, `v1.1.0`, `v1.2.0`, `v1.2.1`, `v1.3.0`.
+  animado arriba en el hub y en la cabecera de cada app. No hay banners ni ventanas.
+- **Plan de lo que sigue**: `docs/ROADMAP.md`. `docs/IDEAS.md` es la lluvia de ideas cruda.
 
 ## En vuelo
 
-Nada en vuelo. El árbol está limpio y `b9b4314` (tope del cotizador a nivel 100) está pusheado a
-`main`; el build de Pages salió `built` para ese commit el 2026-08-30 00:16 UTC. **Sin tag**: el
-último tag sigue siendo `v1.3.0`, así que ese cambio está en producción pero sin versión propia
-— crear `v1.3.1` si se quiere cerrar el ciclo.
+Nada en vuelo. Árbol limpio y `e524836` (crianza entrenada cobrada por experiencia) pusheado a
+`main`; el build de Pages salió `built` para ese commit el 2026-08-30 00:54 UTC.
 
 Lo siguiente, ya especificado en `docs/ROADMAP.md` §3 (Fase 1):
 
@@ -54,47 +49,26 @@ Lo siguiente, ya especificado en `docs/ROADMAP.md` §3 (Fase 1):
 ## Verificar
 
 ```bash
-tools/verify.sh          # = npm test: 7 suites, 341 checks
+tools/verify.sh          # = npm test: 7 suites, 368 checks
 python3 -m http.server 8181   # y abrir http://localhost:8181/
 ```
 
 ## Preguntas abiertas
 
-- **Pendiente del usuario**: activar *Settings → General → Features → Sponsorships* en
-  github.com/cpinan/MiniApps. Sin ese tick, GitHub ignora `.github/FUNDING.yml` y no dibuja el
-  botón *Sponsor*.
-- ¿Se migra `pokewheel` al núcleo compartido, o se deja como está?
+- **Falta el tag `v1.3.1`**: el último es `v1.3.0` y ya hay dos commits en producción sin versión
+  propia — `b9b4314` (tope del cotizador a nivel 100) y `e524836` (crianza entrenada por
+  experiencia). Crearlo cierra el ciclo; decisión del usuario.
+- El cambio de precio de `e524836` **sube lo que se le cobra al cliente** por ese extra (de 40.000
+  fijos a 60.000–165.000 según curva). Si algún cliente tenía una cotización vieja en la mano, ya
+  no cuadra con la app.
 
 ## No repetir
 
-- **No servir el proyecto en un puerto y luego matar el servidor**: el service worker queda
-  registrado en ese origen y la pestaña se sigue sirviendo la versión vieja desde caché para
-  siempre. Fue el "la ruleta no gira" que costó dos rondas de depuración. Salida: el botón
-  *Reparar app*, o cambiar de puerto.
-- **No apuntar `--user-data-dir` de Chrome dentro del repo**: metió 2767 archivos basura en cuatro
-  commits y rompió `git add` a mitad de una escritura. Los perfiles van a `os.tmpdir()`
-  (`tests/lib/cdp.mjs`).
-- **No confiar en `[hidden]` sin más**: cualquier `.clase{display:…}` lo derrota por especificidad.
-  `assets/shared/base.css` ya fuerza `[hidden]{display:none !important}`.
-- **No poner media queries a media hoja**: por igual especificidad ganan las reglas base y los
-  tamaños móviles no se aplican. Van al final del archivo.
-- **No usar `background-clip:text` con el texto partido en `<span>` hijos**: heredan
-  `-webkit-text-fill-color:transparent` y el texto desaparece.
-- **No verificar producción con URLs construidas a mano**: un `//` de más hace medir la página
-  equivocada y parece un despliegue roto que no lo está.
-- **No confiar en `<datalist>` para un buscador**: Chrome esconde las sugerencias cuando el input
-  lleva `autocomplete="off"` y Safari apenas filtra, así que el predictivo parece roto sin que haya
-  ningún error. `apps/pokeprice/app.js` trae un combobox propio (`initCombo`) que sirve de patrón.
-- **La emulación de móvil de un test se hereda entre corridas**: Chrome guarda esa ventana en su
-  perfil y la corrida *siguiente* abre con 390 px de alto, así que `clickReal` pulsa fuera de
-  pantalla y fallan checks que no tienen nada que ver. **Ya está resuelto en el arnés**
-  (`tests/lib/cdp.mjs`): el perfil se borra en cada arranque y `clickReal` lleva el elemento a la
-  vista. No hace falta que cada suite se acuerde.
-- **`scrollIntoView({block:'nearest'})` no basta para poder pulsar**: deja el elemento pegado al
-  borde de arriba, que es donde está la cabecera sticky de todas las apps — cuenta como visible y
-  el clic se lo come la cabecera. `clickReal` comprueba con `elementFromPoint` que el punto es del
-  elemento y, si está tapado, lo centra y vuelve a mirar.
-- **Comprobar producción con `curl` desde la sesión de Claude no funciona**: las salidas a
-  `cpinan.github.io` devuelven código 000 (bloqueadas), aunque `gh api` sí responde. Para saber si
-  un despliegue salió, usar `gh api repos/cpinan/MiniApps/pages/builds/latest`, no `curl` a la
-  página; y para ver la app de verdad, servirla en local.
+- **No devolver la tarifa plana de "entregado entrenado"** (`rates.trained`, campo `rtTrained`).
+  Estaba mal por diseño: cobraba lo mismo para todas las curvas. `restore()` filtra las claves de
+  tarifas que ya no existen justo para que un guardado viejo no la reviva; hay test que lo prueba.
+- **No comparar miles con `1.250.000` en los tests de navegador.** Chrome headless formatea
+  `1,250,000` y el Chrome del usuario `1.250.000`; las comparaciones van por `digits()`.
+- **No escribir el tope del servicio a mano en el HTML.** Sale de `SERVICE_CAP` vía `[data-cap]` y
+  `fillStatic()`, y hay un check que falla si aparece un número suelto.
+- **No migrar `pokewheel` al núcleo compartido** solo por uniformidad: funciona y no es urgente.
