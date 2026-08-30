@@ -45,10 +45,10 @@ for (const g of GROUPS) for (let n = 2; n <= MAX_LEVEL; n++) {
 }
 check('nivel ⇄ experiencia es reversible en los 6 grupos', badRound.length === 0, badRound.slice(0, 4).join(', '));
 
-check('lo que falta de 65 a 65 es cero', GROUPS.every(g => expBetween(g, 65, 65) === 0));
-check('lo que falta nunca es negativo', GROUPS.every(g => expBetween(g, 65, 30) === 0));
-check('de nivel 1 a 65 sale la experiencia total de 65',
-  GROUPS.every(g => expBetween(g, 1, 65) === totalExp(g, 65)));
+check('lo que falta de 100 a 100 es cero', GROUPS.every(g => expBetween(g, 100, 100) === 0));
+check('lo que falta nunca es negativo', GROUPS.every(g => expBetween(g, 100, 30) === 0));
+check('de nivel 1 a 100 sale la experiencia total de 100',
+  GROUPS.every(g => expBetween(g, 1, 100) === totalExp(g, 100)));
 
 /* ---------------- los precios ---------------- */
 
@@ -65,12 +65,13 @@ check('el mínimo por Pokémon se respeta',
   trainingPrice(1000, { ...T, min: 20000 }).price === 20000);
 check('el mínimo no cobra un trabajo inexistente',
   trainingPrice(0, { ...T, min: 20000 }).price === 0);
-check('Garchomp de 1 a 65 son 343.281 EXP y 7 bloques',
-  (() => { const q = trainingPrice(expBetween('lento', 1, 65), T);
-    return q.exp === 343281 && q.charged === 7 && q.price === 35000; })(),
-  JSON.stringify(trainingPrice(expBetween('lento', 1, 65), T)));
+check('Garchomp de 1 a 100 son 1.250.000 EXP y 25 bloques',
+  (() => { const q = trainingPrice(expBetween('lento', 1, 100), T);
+    return q.exp === 1250000 && q.charged === 25 && q.price === 125000; })(),
+  JSON.stringify(trainingPrice(expBetween('lento', 1, 100), T)));
 
-check('el presupuesto nunca pasa del nivel 65',
+check('el tope del servicio es el nivel 100', SERVICE_CAP === 100, String(SERVICE_CAP));
+check('el presupuesto nunca pasa del nivel 100',
   levelForBudget('lento', 0, 99999999, T) === SERVICE_CAP);
 check('un presupuesto corto no sube ni un nivel',
   levelForBudget('lento', 0, 100, T) === 1, String(levelForBudget('lento', 0, 100, T)));
@@ -263,23 +264,23 @@ await setVal('#trSpecies', 'Garchomp');
 await sleep(200);
 check('volver a una especie conocida vuelve a imponer su curva',
   await app.evalJs("return document.getElementById('trGroup').value === 'lento' && document.getElementById('trGroup').disabled;"));
-check('Garchomp 1 → 65 cuesta 35.000 con la tarifa por defecto',
-  digits(g1.price).startsWith('35000'), g1.price);
+check('Garchomp 1 → 100 cuesta 125.000 con la tarifa por defecto',
+  digits(g1.price).startsWith('125000'), g1.price);
 check('el desglose enseña la experiencia que falta',
-  g1.rows.some(r => digits(r).includes('343281')), JSON.stringify(g1.rows));
+  g1.rows.some(r => digits(r).includes('1250000')), JSON.stringify(g1.rows));
 
 await setVal('#trSpecies', 'Blissey');
 await sleep(150);
 const g2 = await app.evalJs(`return { group: document.getElementById('trGroup').value,
   price: document.querySelector('#trResult .price').textContent.trim() };`);
 check('cambiar de especie cambia la curva y el precio',
-  g2.group === 'rapido' && digits(g2.price).startsWith('25000'), JSON.stringify(g2));
+  g2.group === 'rapido' && digits(g2.price).startsWith('80000'), JSON.stringify(g2));
 
 await setVal('#trFrom', '40');
 await sleep(150);
 const g3 = await app.evalJs(`return document.querySelector('#trResult .price').textContent;`);
 check('partir del nivel 40 cobra menos que partir del 1',
-  Number(digits(g3).slice(0, 5)) < 25000, g3);
+  Number(digits(g3).slice(0, 5)) < 80000, g3);
 
 // el modo por experiencia tiene que caer en el mismo punto
 await setVal('#trFromMode', 'exp', 'change');
@@ -298,11 +299,13 @@ check('si ya llegó al objetivo no hay nada que cobrar',
 
 await setVal('#trFromMode', 'nivel', 'change');
 await setVal('#trFrom', '1');
-await setVal('#trTo', '65');
+await setVal('#trTo', '100');
 await setVal('#trSpecies', 'Garchomp');
 await sleep(200);
-check('el nivel objetivo no pasa de 65',
-  await app.evalJs("return document.getElementById('trTo').max === '65';"));
+check('el nivel objetivo no pasa de 100',
+  await app.evalJs("return document.getElementById('trTo').max === '100';"));
+check('el tope sale escrito en la pantalla, no a mano',
+  await app.evalJs("return [...document.querySelectorAll('[data-cap]')].length >= 2 && [...document.querySelectorAll('[data-cap]')].every(el => el.textContent === '100');"));
 
 const budget = await app.evalJs(`const el = document.getElementById('trBudget');
   el.value = '10000'; el.dispatchEvent(new Event('input', { bubbles: true }));
@@ -354,7 +357,7 @@ const ord = await app.evalJs(`return { items: document.querySelectorAll('#orderL
   quote: document.getElementById('quoteText').value };`);
 check('el pedido lista las dos líneas', ord.items === 2, String(ord.items));
 check('el total suma entrenamiento y crianza',
-  digits(ord.grand).includes('315000'), ord.grand);
+  digits(ord.grand).includes('405000'), ord.grand);
 check('el texto de la cotización nombra los dos servicios',
   /Garchomp/.test(ord.quote) && /Metagross/.test(ord.quote) && /TOTAL/.test(ord.quote),
   ord.quote.slice(0, 120));
@@ -363,7 +366,7 @@ await setVal('#orderDiscount', '10');
 await sleep(200);
 const disc = await app.evalJs(`return { grand: document.querySelector('#orderTotals .grand').textContent,
   quote: document.getElementById('quoteText').value };`);
-check('el descuento baja el total a 283.500', digits(disc.grand).includes('283500'), disc.grand);
+check('el descuento baja el total a 364.500', digits(disc.grand).includes('364500'), disc.grand);
 check('y el descuento sale en el texto', /Descuento 10%/.test(disc.quote));
 
 await setVal('#orderDeposit', '50');
@@ -384,7 +387,7 @@ await sleep(200);
 await app.clickReal('#tabTrain');
 await sleep(200);
 check('cambiar la tarifa recalcula el precio al vuelo',
-  digits(await app.evalJs("return document.querySelector('#trResult .price').textContent;")).startsWith('63000'),
+  digits(await app.evalJs("return document.querySelector('#trResult .price').textContent;")).startsWith('225000'),
   await app.evalJs("return document.querySelector('#trResult .price').textContent;"));
 
 await app.clickReal('#tabRates');

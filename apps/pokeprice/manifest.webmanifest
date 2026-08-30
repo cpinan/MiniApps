@@ -1,7 +1,7 @@
 {
   "name": "Cotizador PokeMMO",
   "short_name": "Cotizador",
-  "description": "Precio del entrenamiento por experiencia hasta nivel 65 y de la crianza 2×31, con tarifas propias y cotización lista para copiar.",
+  "description": "Precio del entrenamiento por experiencia hasta nivel 100 y de la crianza 2×31, con tarifas propias y cotización lista para copiar.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

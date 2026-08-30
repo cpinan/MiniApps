@@ -13,7 +13,7 @@ publicar en GitHub Pages y compartir con un link.
 | 🎲 **Equipos** | Reparte una lista en equipos parejos, con capitanes fijos y parejas que no deben coincidir. | [abrir](https://cpinan.github.io/MiniApps/apps/teams/) |
 | 🎁 **Amigo secreto** | Sortea y da un link por persona; la asignación viaja en la URL, sin servidor. | [abrir](https://cpinan.github.io/MiniApps/apps/secretsanta/) |
 | 🛡️ **Tabla de tipos** | Efectividad de los 18 tipos: ataque, defensa dual y matriz completa, offline. | [abrir](https://cpinan.github.io/MiniApps/apps/typechart/) |
-| 💰 **Cotizador PokeMMO** | Precio de entrenamiento por experiencia hasta nivel 65 y de crianza 2×31, con tus tarifas y la cotización lista para pegar. | [abrir](https://cpinan.github.io/MiniApps/apps/pokeprice/) |
+| 💰 **Cotizador PokeMMO** | Precio de entrenamiento por experiencia hasta nivel 100 y de crianza 2×31, con tus tarifas y la cotización lista para pegar. | [abrir](https://cpinan.github.io/MiniApps/apps/pokeprice/) |
 | 🔢 **Bolillero** | Bingo: saca números sin repetir y los canta con la voz del navegador. | [abrir](https://cpinan.github.io/MiniApps/apps/bingo/) |
 
 Historial de cambios en [CHANGELOG.md](CHANGELOG.md). Plan de lo que viene, con la investigación
@@ -55,7 +55,7 @@ Documentación completa en [`apps/pokewheel/README.md`](apps/pokewheel/README.md
 
 - **Entrenamiento por experiencia.** La tarifa es *X por cada Y de experiencia*, configurable, con
   el bloque empezado cobrado entero o al detalle, y un mínimo por Pokémon opcional. El tope del
-  servicio es el **nivel 65**.
+  servicio es el **nivel 100**.
 - **La experiencia sale de la curva real** de gen 3+, la que usa PokeMMO: errática, rápida, media
   rápida, media lenta, lenta y fluctuante. Los seis totales al nivel 100 (600.000 · 800.000 ·
   1.000.000 · 1.059.860 · 1.250.000 · 1.640.000) están cubiertos por tests, porque si una curva
@@ -64,7 +64,7 @@ Documentación completa en [`apps/pokewheel/README.md`](apps/pokewheel/README.md
   no paga lo mismo que uno que dice "estoy en nivel 54", y cambiar de modo conserva el punto.
 - **Cuánto le alcanza al cliente**: se escribe su presupuesto y sale hasta qué nivel llega.
 - **Crianza 2×31**: precio base más recargo por especie, con extras por naturaleza, sexo,
-  movimientos huevo, IVs de más y entrega ya entrenado a 65.
+  movimientos huevo, IVs de más y entrega ya entrenado a 100.
 - **La curva va amarrada al Pokémon.** La tabla trae 169 especies, ordenada alfabéticamente, con su
   curva de experiencia y una dificultad de crianza — común, rara, o sin género y por tanto solo
   criable con Ditto. Si la especie está en la tabla su curva manda y el desplegable queda

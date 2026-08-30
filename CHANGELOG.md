@@ -4,6 +4,16 @@ Todos los cambios relevantes de este repo. Formato basado en
 [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y
 [SemVer](https://semver.org/lang/es/).
 
+## [Sin publicar]
+
+### Cambiado
+
+- **💰 Cotizador PokeMMO**: el tope del servicio pasa del **nivel 65 al nivel 100**. Afecta al
+  nivel objetivo del entrenamiento (por defecto y máximo), al techo de "hasta dónde le alcanza al
+  cliente", al extra de crianza "entregado entrenado a" y al texto de la cotización. El tope vive
+  en una sola constante (`SERVICE_CAP` en `apps/pokeprice/exp.js`) y la pantalla lo escribe desde
+  ahí, así que no queda ningún 65 a mano en el HTML.
+
 ## [1.3.0] — 2026-08-29
 
 ### Añadido

@@ -16,8 +16,9 @@ export const GROUP_LABELS = {
   fluctuante: 'Fluctuante',
 };
 
-// Nivel tope del servicio. Las curvas llegan a 100; el formulario no deja pasar de aquí.
-export const SERVICE_CAP = 65;
+// Nivel tope del servicio: el formulario no deja pasar de aquí y es el mismo
+// número que sale en la pantalla y en la cotización.
+export const SERVICE_CAP = 100;
 export const MAX_LEVEL = 100;
 
 const cube = (n) => n * n * n;

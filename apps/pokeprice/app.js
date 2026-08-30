@@ -6,7 +6,7 @@ import {
   findSpecies, searchSpecies,
 } from './exp.js';
 
-const BUILD = '2026-08-29.1';
+const BUILD = '2026-08-29.2';
 const store = storage('pokeprice.v1');
 
 const DEFAULT_RATES = {
@@ -255,7 +255,7 @@ function breedInput() {
   const extras = [];
   if (b.nature) extras.push({ label: 'naturaleza', amount: state.rates.nature });
   if (b.gender) extras.push({ label: 'sexo', amount: state.rates.gender });
-  if (b.trained) extras.push({ label: 'entrenado a 65', amount: state.rates.trained });
+  if (b.trained) extras.push({ label: `entrenado a ${SERVICE_CAP}`, amount: state.rates.trained });
   const moves = clamp(Math.floor(b.moves), 0, 4);
   const ivs = clamp(Math.floor(b.ivs), 0, 4);
   if (moves > 0) extras.push({ label: `${moves} mov. huevo`, amount: state.rates.move * moves });
@@ -298,7 +298,7 @@ function addBreeding() {
   if (state.breed.gender) bits.push('sexo');
   if (moves) bits.push(`${moves} mov. huevo`);
   if (ivs) bits.push(`${ivs} IV extra`);
-  if (state.breed.trained) bits.push('entrenado a 65');
+  if (state.breed.trained) bits.push(`entrenado a ${SERVICE_CAP}`);
   state.order.items.push({
     id: nextId++, kind: 'breed', title: `${name} · crianza`,
     detail: bits.join(' · '),
@@ -410,6 +410,12 @@ function flash(msg) {
 function fillStatic() {
   $('trGroup').innerHTML = GROUPS
     .map(g => `<option value="${g}">${curveName(g)}</option>`).join('');
+  // El tope del servicio se escribe una sola vez, en exp.js: de ahí salen tanto el
+  // texto de la pantalla como los límites de los campos de nivel.
+  for (const el of document.querySelectorAll('[data-cap]')) el.textContent = String(SERVICE_CAP);
+  $('trTo').max = SERVICE_CAP;
+  $('trTo').value = SERVICE_CAP;
+  $('trFrom').max = SERVICE_CAP - 1;
 }
 
 function bind() {

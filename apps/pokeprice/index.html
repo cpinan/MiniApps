@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Cotizador PokeMMO</title>
-<meta name="description" content="Calcula el precio de tus servicios de PokeMMO: entrenamiento por experiencia hasta nivel 65 y crianza 2×31 con recargo por especie. Offline y sin anuncios.">
+<meta name="description" content="Calcula el precio de tus servicios de PokeMMO: entrenamiento por experiencia hasta nivel 100 y crianza 2×31 con recargo por especie. Offline y sin anuncios.">
 <meta name="theme-color" content="#2FBFC9">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icons/favicon.svg" type="image/svg+xml">
@@ -38,7 +38,7 @@
 
   <!-- ==================== ENTRENAMIENTO ==================== -->
   <section id="panelTrain" class="panel-box" role="tabpanel" aria-labelledby="tabTrain">
-    <p class="lead">Cobras <b id="leadRate">—</b>. El tope del servicio es el <b>nivel 65</b>.</p>
+    <p class="lead">Cobras <b id="leadRate">—</b>. El tope del servicio es el <b>nivel <span data-cap>100</span></b>.</p>
 
     <div class="grid2">
       <div class="field">
@@ -66,10 +66,10 @@
         </select>
       </label>
       <label class="field" id="trFromWrap"><span id="trFromLabel">Nivel actual</span>
-        <input id="trFrom" type="number" inputmode="numeric" min="1" max="64" step="1" value="1">
+        <input id="trFrom" type="number" inputmode="numeric" min="1" max="99" step="1" value="1">
       </label>
       <label class="field">Nivel objetivo
-        <input id="trTo" type="number" inputmode="numeric" min="2" max="65" step="1" value="65">
+        <input id="trTo" type="number" inputmode="numeric" min="2" max="100" step="1" value="100">
       </label>
     </div>
 
@@ -118,7 +118,7 @@
     <div class="extras">
       <label class="check"><input id="brNature" type="checkbox"> Naturaleza pedida <span class="tagmoney" id="tagNature"></span></label>
       <label class="check"><input id="brGender" type="checkbox"> Sexo pedido <span class="tagmoney" id="tagGender"></span></label>
-      <label class="check"><input id="brTrained" type="checkbox"> Entregado entrenado a 65 <span class="tagmoney" id="tagTrained"></span></label>
+      <label class="check"><input id="brTrained" type="checkbox"> Entregado entrenado a <span data-cap>100</span> <span class="tagmoney" id="tagTrained"></span></label>
     </div>
 
     <div class="grid3">
@@ -224,7 +224,7 @@
           <input id="rtIv" type="number" inputmode="numeric" min="0" step="1000" value="60000">
         </label>
       </div>
-      <label class="field">Entregado entrenado a 65
+      <label class="field">Entregado entrenado a <span data-cap>100</span>
         <input id="rtTrained" type="number" inputmode="numeric" min="0" step="1000" value="40000">
       </label>
     </details>

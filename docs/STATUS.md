@@ -13,14 +13,14 @@ Construir la app de **temporizador** (`apps/timer/`) siguiendo la Fase 1 de `doc
   tipos), `bingo` (bolillero) y `pokeprice` (cotizador de PokeMMO). Cada una es PWA instalable y
   offline, con su service worker network-first, sello de build y botón "Reparar app".
 - **`apps/pokeprice/` (💰 Cotizador PokeMMO)**: precio de entrenamiento por experiencia hasta nivel
-  65 y de crianza 2×31, con tarifas editables, pedido de varias líneas y texto de cotización para
+  100 y de crianza 2×31, con tarifas editables, pedido de varias líneas y texto de cotización para
   el cliente. La lógica pura vive en `apps/pokeprice/exp.js` (seis curvas de experiencia de gen
   3+, precios y 169 especies) y los 91 checks en `tests/pokeprice.test.mjs`. La curva va amarrada a
   la especie y se nombra por su experiencia total al nivel 100, que es como la reconoce el jugador.
 - **Núcleo compartido** en `assets/shared/` (`base.css` + `core.js`): temas, parseo de listas,
   azar sin sesgo, confeti, sonido y arranque PWA. `pokewheel` es la única que no lo usa: tiene su
   propio CSS/JS porque nació antes y funciona; migrarla no es urgente.
-- **339 checks verdes** en siete suites (`npm test`), con chequeos de móvil obligatorios en todas.
+- **341 checks verdes** en siete suites (`npm test`), con chequeos de móvil obligatorios en todas.
 - **El arnés de navegador es de fiar**: `tests/lib/cdp.mjs` borra el perfil de Chrome en cada
   arranque y `clickReal` lleva el elemento a la vista y comprueba que el clic es suyo. Una suite
   nueva puede llamar a `clickReal` sin precauciones propias.
@@ -50,7 +50,7 @@ Lo siguiente, ya especificado en `docs/ROADMAP.md` §3 (Fase 1):
 ## Verificar
 
 ```bash
-tools/verify.sh          # = npm test: 7 suites, 339 checks
+tools/verify.sh          # = npm test: 7 suites, 341 checks
 python3 -m http.server 8181   # y abrir http://localhost:8181/
 ```
 
